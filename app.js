@@ -849,7 +849,7 @@ function addCourseToDictionary(courseId) {
   const existingIds = new Set(items.map((item) => item.id));
   const newItems = getCourseItems(course)
     .filter((item) => !existingIds.has(item.id))
-    .map((item) => ({ ...item, savedAt: "Today", level: "Learning" }));
+    .map((item) => ({ ...item, savedAt: "Today", level: "Learning", reviewCount: 0, dueAt: getDateStamp(0) }));
 
   items = [...newItems, ...items];
   selectedId = items[0]?.id ?? null;
@@ -1073,6 +1073,14 @@ function renderDetail(item) {
         <span class="detail-label">Kayıt</span>
         <strong>${escapeHtml(savedAtLabels[item.savedAt] || item.savedAt)}</strong>
       </div>
+      <div class="meta-box">
+        <span class="detail-label">Sıradaki tekrar</span>
+        <strong>${escapeHtml(getReviewLabel(item))}</strong>
+      </div>
+      <div class="meta-box">
+        <span class="detail-label">Tekrar sayısı</span>
+        <strong>${Number(item.reviewCount || 0)}</strong>
+      </div>
     </div>
 
     <div class="detail-card">
@@ -1114,9 +1122,44 @@ function selectNextCard() {
 }
 
 function updateLevel(id, level) {
-  items = items.map((item) => (item.id === id ? { ...item, level } : item));
+  items = items.map((item) => (item.id === id ? scheduleReview({ ...item, level }) : item));
   saveItems();
   renderList();
+}
+
+function scheduleReview(item) {
+  const intervals = {
+    Learning: 0,
+    Review: 1,
+    Known: 7,
+  };
+  return {
+    ...item,
+    reviewCount: Number(item.reviewCount || 0) + 1,
+    reviewedAt: getDateStamp(0),
+    dueAt: getDateStamp(intervals[item.level] ?? 0),
+  };
+}
+
+function getReviewLabel(item) {
+  if (!item.dueAt) {
+    return item.level === "Known" ? "Gerektikçe" : "Bugün";
+  }
+
+  const today = getDateStamp(0);
+  if (item.dueAt <= today) {
+    return "Bugün";
+  }
+  if (item.dueAt === getDateStamp(1)) {
+    return "Yarın";
+  }
+  return item.dueAt;
+}
+
+function getDateStamp(offsetDays) {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return date.toISOString().slice(0, 10);
 }
 
 function deleteItem(id) {
