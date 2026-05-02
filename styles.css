@@ -947,6 +947,18 @@ button:focus-visible {
   gap: 10px;
 }
 
+.lesson-options .quiz-correct {
+  border-color: var(--accent-2);
+  background: var(--green-soft);
+  color: var(--accent-2);
+}
+
+.lesson-options .quiz-wrong {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .lesson-step {
   border: 1px solid var(--line);
   border-radius: 14px;

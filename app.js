@@ -414,6 +414,9 @@ let items = loadItems();
 let selectedId = items[0]?.id ?? null;
 let activeType = "all";
 let currentLessonId = null;
+let lessonQuizIndex = 0;
+let lessonQuizScore = 0;
+let lessonQuizAnswered = false;
 
 const itemList = document.querySelector("#itemList");
 const detailPanel = document.querySelector("#detailPanel");
@@ -1064,6 +1067,9 @@ function renderCourses() {
 
 function startLesson(courseId) {
   currentLessonId = courseId;
+  lessonQuizIndex = 0;
+  lessonQuizScore = 0;
+  lessonQuizAnswered = false;
   lessonStatus.textContent = "";
   switchView("lesson", document.querySelector('[data-view="courses"]'));
 }
@@ -1109,22 +1115,85 @@ function renderLessonQuiz(courseItems) {
   lessonOptions.innerHTML = "";
   if (!courseItems.length) {
     lessonQuizPrompt.textContent = "Bu ders için kontrol sorusu henüz yok.";
+    lessonStatus.textContent = "";
     return;
   }
 
-  const answer = courseItems[0];
-  const options = [answer, ...resourceDictionary.filter((item) => item.language === answer.language && item.id !== answer.id).slice(0, 2)];
-  lessonQuizPrompt.textContent = `"${answer.term}" ne anlama gelir?`;
+  const answer = courseItems[lessonQuizIndex % courseItems.length];
+  const options = getQuizOptions(answer);
+  lessonQuizPrompt.textContent = `${lessonQuizIndex + 1}/${courseItems.length}: "${answer.term}" ne anlama gelir?`;
   options.forEach((option) => {
     const button = document.createElement("button");
     button.className = "icon-button";
     button.type = "button";
     button.textContent = option.translation;
-    button.addEventListener("click", () => {
-      lessonStatus.textContent = option.id === answer.id ? "Doğru." : `Tekrar bak: ${answer.translation}`;
-    });
+    button.dataset.optionId = option.id;
+    button.disabled = lessonQuizAnswered;
+    button.addEventListener("click", () => answerLessonQuiz(option, answer, courseItems));
     lessonOptions.appendChild(button);
   });
+
+  const nextButton = document.createElement("button");
+  nextButton.className = "icon-button";
+  nextButton.type = "button";
+  nextButton.textContent = lessonQuizIndex + 1 >= courseItems.length ? "Tekrar başlat" : "Sonraki soru";
+  nextButton.dataset.quizNext = "true";
+  nextButton.disabled = !lessonQuizAnswered;
+  nextButton.addEventListener("click", () => advanceLessonQuiz(courseItems));
+  lessonOptions.appendChild(nextButton);
+
+  if (!lessonQuizAnswered) {
+    lessonStatus.textContent = `Skor: ${lessonQuizScore}/${courseItems.length}`;
+  }
+}
+
+function getQuizOptions(answer) {
+  const distractors = resourceDictionary
+    .filter((item) => item.language === answer.language && item.id !== answer.id && item.translation !== answer.translation)
+    .filter((item, index, list) => list.findIndex((candidate) => candidate.translation === item.translation) === index)
+    .slice(0, 3);
+  return shuffleItems([answer, ...distractors]).slice(0, 4);
+}
+
+function answerLessonQuiz(option, answer, courseItems) {
+  if (lessonQuizAnswered) {
+    return;
+  }
+
+  lessonQuizAnswered = true;
+  const isCorrect = option.id === answer.id;
+  if (isCorrect) {
+    lessonQuizScore += 1;
+  }
+
+  lessonOptions.querySelectorAll("button").forEach((button) => {
+    button.disabled = false;
+    const matchesAnswer = button.dataset.optionId === answer.id;
+    const matchesSelected = button.dataset.optionId === option.id;
+    button.classList.toggle("quiz-correct", matchesAnswer);
+    button.classList.toggle("quiz-wrong", matchesSelected && !isCorrect);
+    if (!button.dataset.quizNext) {
+      button.disabled = true;
+    }
+  });
+  lessonStatus.textContent = isCorrect
+    ? `Doğru. Skor: ${lessonQuizScore}/${courseItems.length}`
+    : `Tekrar bak: ${answer.translation}. Skor: ${lessonQuizScore}/${courseItems.length}`;
+}
+
+function advanceLessonQuiz(courseItems) {
+  lessonQuizAnswered = false;
+  if (lessonQuizIndex + 1 >= courseItems.length) {
+    lessonQuizIndex = 0;
+    lessonQuizScore = 0;
+  } else {
+    lessonQuizIndex += 1;
+  }
+  renderLessonQuiz(courseItems);
+}
+
+function shuffleItems(values) {
+  return [...values].sort(() => Math.random() - 0.5);
 }
 
 function getCourseItems(course) {
