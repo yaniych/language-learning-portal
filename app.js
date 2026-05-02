@@ -429,6 +429,16 @@ const sortSummary = document.querySelector("#sortSummary");
 const learningStat = document.querySelector("#learningStat");
 const reviewStat = document.querySelector("#reviewStat");
 const knownStat = document.querySelector("#knownStat");
+const focusTitle = document.querySelector("#focusTitle");
+const focusDescription = document.querySelector("#focusDescription");
+const focusMeterValue = document.querySelector("#focusMeterValue");
+const focusMeterFill = document.querySelector("#focusMeterFill");
+const practiceCount = document.querySelector("#practiceCount");
+const nextCourseHint = document.querySelector("#nextCourseHint");
+const languageBars = document.querySelector("#languageBars");
+const startPracticeButton = document.querySelector("#startPracticeButton");
+const addQuickCardButton = document.querySelector("#addQuickCardButton");
+const openCoursesQuickButton = document.querySelector("#openCoursesQuickButton");
 const clearFiltersButton = document.querySelector("#clearFiltersButton");
 const resetButton = document.querySelector("#resetButton");
 const newCardButton = document.querySelector("#newCardButton");
@@ -787,6 +797,50 @@ function renderSourceFilter() {
   sourceFilter.value = currentSource === "all" || sources.includes(currentSource) ? currentSource : "all";
 }
 
+function getDueItems() {
+  return items.filter((item) => !item.dueAt || item.dueAt <= getDateStamp(0));
+}
+
+function renderStudyDashboard() {
+  const dueItems = getDueItems();
+  const knownCount = items.filter((item) => item.level === "Known").length;
+  const progress = items.length ? Math.round((knownCount / items.length) * 100) : 0;
+  const nextCourse = courseCatalog.find((course) => course.language === userSettings.defaultCourse);
+
+  practiceCount.textContent = `${dueItems.length} kart`;
+  focusMeterValue.textContent = `${progress}%`;
+  focusMeterFill.style.width = `${progress}%`;
+  nextCourseHint.textContent = nextCourse ? nextCourse.title : "Katalogdan devam et";
+
+  if (!items.length) {
+    focusTitle.textContent = "İlk çalışma desteni oluştur";
+    focusDescription.textContent = "Bir kursa başla veya kendi kelimeni ekleyerek sözlüğünü hazırlamaya başla.";
+  } else if (dueItems.length) {
+    focusTitle.textContent = `${dueItems.length} kart tekrar bekliyor`;
+    focusDescription.textContent = "Bugünkü pratikte öğreniliyor ve tekrar durumundaki kartları hızlıca işaretleyebilirsin.";
+  } else {
+    focusTitle.textContent = "Bugün tekrar borcun yok";
+    focusDescription.textContent = "Yeni kart ekleyebilir, kurs kataloğundan devam edebilir veya bilinen kartlarını gözden geçirebilirsin.";
+  }
+
+  renderLanguageBars();
+}
+
+function renderLanguageBars() {
+  const maxCount = Math.max(1, ...Object.keys(languageLabels).map((language) => items.filter((item) => item.language === language).length));
+  languageBars.innerHTML = Object.keys(languageLabels).map((language) => {
+    const count = items.filter((item) => item.language === language).length;
+    const width = Math.max(5, Math.round((count / maxCount) * 100));
+    return `
+      <div class="language-bar">
+        <span>${escapeHtml(languageLabels[language])}</span>
+        <div><span style="width: ${width}%"></span></div>
+        <strong>${count}</strong>
+      </div>
+    `;
+  }).join("");
+}
+
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   themeButton.textContent = theme === "dark" ? "Açık" : "Koyu";
@@ -815,6 +869,7 @@ function applySettings() {
   goalLabel.textContent = `${completedXp} / ${userSettings.dailyGoal} XP`;
   goalFill.style.width = `${progress}%`;
   goalText.textContent = `${languageLabels[userSettings.defaultCourse]} temel · kartlar kurslardan gelir`;
+  renderStudyDashboard();
   renderCourses();
   renderList();
 }
@@ -1287,6 +1342,7 @@ function addCourseToDictionary(courseId) {
   items = [...newItems, ...items];
   selectedId = items[0]?.id ?? null;
   saveItems();
+  renderStudyDashboard();
   renderCourses();
   renderLesson();
   renderList();
@@ -1357,6 +1413,7 @@ function addManualCard(event) {
   saveItems();
   saveSettings();
   renderSourceFilter();
+  renderStudyDashboard();
   clearFilters();
   closeCardDialog();
 }
@@ -1696,6 +1753,7 @@ function selectNextCard() {
 function updateLevel(id, level) {
   items = items.map((item) => (item.id === id ? scheduleReview({ ...item, level }) : item));
   saveItems();
+  renderStudyDashboard();
   renderList();
 }
 
@@ -1742,6 +1800,7 @@ function deleteItem(id) {
   selectedId = getFilteredItems()[0]?.id ?? items[0]?.id ?? null;
   saveItems();
   renderSourceFilter();
+  renderStudyDashboard();
   renderList();
 }
 
@@ -1790,6 +1849,7 @@ function clearFilters() {
 
 clearFiltersButton.addEventListener("click", clearFilters);
 newCardButton.addEventListener("click", openCardDialog);
+addQuickCardButton.addEventListener("click", openCardDialog);
 closeCardDialogButton.addEventListener("click", closeCardDialog);
 cardForm.addEventListener("submit", addManualCard);
 resetButton.addEventListener("click", () => {
@@ -1800,6 +1860,7 @@ resetButton.addEventListener("click", () => {
   selectedId = null;
   saveItems();
   renderSourceFilter();
+  renderStudyDashboard();
   renderList();
 });
 themeButton.addEventListener("click", () => {
@@ -1815,6 +1876,12 @@ languageMenu.querySelectorAll("[data-language]").forEach((button) => {
 });
 openDictionaryButton.addEventListener("click", () => {
   switchView("deck", document.querySelector('[data-view="deck"]'));
+});
+startPracticeButton.addEventListener("click", () => {
+  switchView("practice", document.querySelector('[data-view="practice"]'));
+});
+openCoursesQuickButton.addEventListener("click", () => {
+  switchView("courses", document.querySelector('[data-view="courses"]'));
 });
 featureActionButton.addEventListener("click", () => {
   const targetView = featureActionButton.dataset.targetView || "courses";

@@ -117,6 +117,43 @@
           </article>
         </section>
 
+        <section class="study-dashboard deck-view" aria-label="Bugünkü çalışma">
+          <article class="daily-focus">
+            <div>
+              <p class="eyebrow">Bugünkü çalışma</p>
+              <h2 id="focusTitle">Kartlarını hazırlayalım</h2>
+              <p id="focusDescription">Kurslardan veya kendi kartlarından çalışma desteni oluştur.</p>
+            </div>
+            <div class="focus-meter" aria-label="Günlük hedef ilerlemesi">
+              <span id="focusMeterValue">0%</span>
+              <div><span id="focusMeterFill"></span></div>
+            </div>
+          </article>
+
+          <aside class="quick-panel">
+            <button class="quick-action primary" id="startPracticeButton" type="button">
+              <span>Pratik başlat</span>
+              <strong id="practiceCount">0 kart</strong>
+            </button>
+            <button class="quick-action" id="addQuickCardButton" type="button">
+              <span>Yeni kart</span>
+              <strong>Kendi kelimeni ekle</strong>
+            </button>
+            <button class="quick-action" id="openCoursesQuickButton" type="button">
+              <span>Kursa dön</span>
+              <strong id="nextCourseHint">Katalogdan devam et</strong>
+            </button>
+          </aside>
+
+          <article class="language-snapshot">
+            <div>
+              <p class="eyebrow">Dil dağılımı</p>
+              <h2>Aktif kartlar</h2>
+            </div>
+            <div class="language-bars" id="languageBars"></div>
+          </article>
+        </section>
+
         <section class="content-grid deck-view">
           <div class="list-panel">
             <div class="list-heading">
