@@ -7,12 +7,11 @@ const resourceDictionary = [
     phrase: "спасибо за помощь",
     phraseTranslation: "yardim icin tesekkurler",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Большой универсальный словарь",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Today",
     level: "Learning",
     note: "Rusça günlük teşekkür kalıbı.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D1%81%D0%BF%D0%B0%D1%81%D0%B8%D0%B1%D0%BE",
   },
   {
     id: "ru-2",
@@ -22,12 +21,11 @@ const resourceDictionary = [
     phrase: "скажите, пожалуйста",
     phraseTranslation: "lutfen soyleyin",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Словарь-справочник",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Today",
     level: "Review",
     note: "Rica ve nezaket bildirir.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%BF%D0%BE%D0%B6%D0%B0%D0%BB%D1%83%D0%B9%D1%81%D1%82%D0%B0",
   },
   {
     id: "ru-3",
@@ -37,12 +35,11 @@ const resourceDictionary = [
     phrase: "привет, как дела?",
     phraseTranslation: "selam, nasilsin?",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Метасловарь",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Yesterday",
     level: "Learning",
     note: "Samimi karsilama sozu.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82",
   },
   {
     id: "ru-4",
@@ -52,12 +49,11 @@ const resourceDictionary = [
     phrase: "добрый день, Анна",
     phraseTranslation: "iyi gunler, Anna",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Русский речевой этикет",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Yesterday",
     level: "Known",
     note: "E-posta ve günlük selamlamada kullanılır.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%B4%D0%BE%D0%B1%D1%80%D1%8B%D0%B9%20%D0%B4%D0%B5%D0%BD%D1%8C",
   },
   {
     id: "ru-5",
@@ -67,12 +63,11 @@ const resourceDictionary = [
     phrase: "извините за опоздание",
     phraseTranslation: "gecikme icin affedersiniz",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Метасловарь",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 27",
     level: "Learning",
     note: "Ozur ve dikkat cekme kalibi.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%B8%D0%B7%D0%B2%D0%B8%D0%BD%D0%B8%D1%82%D0%B5",
   },
   {
     id: "ru-6",
@@ -82,12 +77,11 @@ const resourceDictionary = [
     phrase: "да, всё хорошо",
     phraseTranslation: "evet, her sey iyi",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Метасловарь",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 27",
     level: "Review",
     note: "Kisa durum cevabi.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%B2%D1%81%D1%91%20%D1%85%D0%BE%D1%80%D0%BE%D1%88%D0%BE",
   },
   {
     id: "ru-7",
@@ -97,12 +91,11 @@ const resourceDictionary = [
     phrase: "можно кофе?",
     phraseTranslation: "kahve alabilir miyim?",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Метасловарь",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 26",
     level: "Learning",
     note: "Izin isterken cok kullanilir.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%BC%D0%BE%D0%B6%D0%BD%D0%BE",
   },
   {
     id: "ru-8",
@@ -112,12 +105,11 @@ const resourceDictionary = [
     phrase: "хорошо, до завтра",
     phraseTranslation: "tamam, yarin gorusuruz",
     language: "Russian",
-    source: "Gramota.ru",
-    title: "Метасловарь",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 26",
     level: "Known",
     note: "Vedalasma kalibi.",
-    dictionaryUrl: "https://gramota.ru/poisk?query=%D0%B4%D0%BE%20%D0%B7%D0%B0%D0%B2%D1%82%D1%80%D0%B0",
   },
   {
     id: "en-1",
@@ -127,12 +119,11 @@ const resourceDictionary = [
     phrase: "make sure it works",
     phraseTranslation: "calistigindan emin ol",
     language: "English",
-    source: "Oxford",
-    title: "Oxford Learner's Dictionaries",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 25",
     level: "Learning",
     note: "Günlük iş ve mesaj dilinde yaygın.",
-    dictionaryUrl: "https://www.oxfordlearnersdictionaries.com/",
   },
   {
     id: "en-2",
@@ -142,12 +133,11 @@ const resourceDictionary = [
     phrase: "make an appointment",
     phraseTranslation: "randevu almak",
     language: "English",
-    source: "Oxford",
-    title: "Oxford Collocations Dictionary",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 25",
     level: "Review",
     note: "Appointment genelde make/book ile kullanilir.",
-    dictionaryUrl: "https://www.oxfordlearnersdictionaries.com/",
   },
   {
     id: "en-3",
@@ -157,12 +147,11 @@ const resourceDictionary = [
     phrase: "let's take a break",
     phraseTranslation: "hadi mola verelim",
     language: "English",
-    source: "Oxford",
-    title: "Oxford Collocations Dictionary",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 24",
     level: "Known",
     note: "Do yerine take ile kullanilir.",
-    dictionaryUrl: "https://www.oxfordlearnersdictionaries.com/",
   },
   {
     id: "es-1",
@@ -172,12 +161,11 @@ const resourceDictionary = [
     phrase: "un cafe, por favor",
     phraseTranslation: "bir kahve lutfen",
     language: "Spanish",
-    source: "RAE",
-    title: "Diccionario de la lengua espanola",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 24",
     level: "Learning",
     note: "Siparis ve rica kalibi.",
-    dictionaryUrl: "https://dle.rae.es/",
   },
   {
     id: "es-2",
@@ -187,12 +175,11 @@ const resourceDictionary = [
     phrase: "quedamos manana",
     phraseTranslation: "yarin bulusalim",
     language: "Spanish",
-    source: "RAE",
-    title: "Diccionario de la lengua espanola",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 23",
     level: "Review",
     note: "Buluşma ayarlarken kullanılır.",
-    dictionaryUrl: "https://dle.rae.es/",
   },
   {
     id: "de-1",
@@ -202,12 +189,11 @@ const resourceDictionary = [
     phrase: "ja, gern",
     phraseTranslation: "evet, memnuniyetle",
     language: "German",
-    source: "Duden",
-    title: "Duden Online",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 22",
     level: "Learning",
     note: "Kisa ve dogal onay cevabi.",
-    dictionaryUrl: "https://www.duden.de/",
   },
   {
     id: "de-2",
@@ -217,12 +203,11 @@ const resourceDictionary = [
     phrase: "gib mir Bescheid",
     phraseTranslation: "bana haber ver",
     language: "German",
-    source: "Duden",
-    title: "Duden Online",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 22",
     level: "Learning",
     note: "Günlük mesajlarda çok kullanılır.",
-    dictionaryUrl: "https://www.duden.de/",
   },
   {
     id: "fr-1",
@@ -232,12 +217,11 @@ const resourceDictionary = [
     phrase: "l'addition, s'il vous plait",
     phraseTranslation: "hesap lutfen",
     language: "French",
-    source: "Larousse",
-    title: "Dictionnaire Larousse",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 21",
     level: "Known",
     note: "Restoran ve resmi rica kalibi.",
-    dictionaryUrl: "https://www.larousse.fr/dictionnaires/francais",
   },
   {
     id: "fr-2",
@@ -247,12 +231,11 @@ const resourceDictionary = [
     phrase: "prendre rendez-vous",
     phraseTranslation: "randevu almak",
     language: "French",
-    source: "Larousse",
-    title: "Dictionnaire Larousse",
+    source: "System Catalog",
+    title: "Built-in course catalog",
     savedAt: "Apr 21",
     level: "Review",
     note: "Prendre fiiliyle kalıplaşır.",
-    dictionaryUrl: "https://www.larousse.fr/dictionnaires/francais",
   },
 ];
 
@@ -314,7 +297,7 @@ const courseCatalog = [
     id: "ru-fourman-alphabet",
     language: "Russian",
     title: "Alfabe ve okuma",
-    description: "Fourman kitabındaki alfabe ve okuma alıştırmaları bölümüne göre ilk sesler ve kısa kalıplar.",
+    description: "Yerleşik kurs kataloğundaki alfabe, okuma ve kısa kalıp alıştırmaları.",
     level: "Başlangıç",
     minutes: 10,
     itemIds: ["ru-3", "ru-4"],
@@ -365,7 +348,7 @@ const courseCatalog = [
     language: "Russian",
     title: `Ders ${index + 1}: ${description}`,
     sourceTitle: title,
-    description: `Teach Yourself Russian: ${title}. Busuu tarzı kısa ders akışı.`,
+    description: `Sistem kataloğu: ${title}. Kısa ders akışı.`,
     level: index < 12 ? "Başlangıç" : index < 28 ? "Temel" : "Orta",
     minutes: index < 12 ? 8 : index < 28 ? 10 : 12,
     itemIds,
@@ -414,7 +397,7 @@ const defaultSettings = {
   compactList: false,
   defaultCourse: "Russian",
   dailyGoal: 20,
-  enabledSources: ["Gramota.ru", "Oxford", "RAE", "Duden", "Larousse"],
+  enabledSources: ["System Catalog"],
 };
 const languageFlags = {
   Russian: "flag-russian",
@@ -452,7 +435,11 @@ function saveItems() {
 
 function loadSettings() {
   const saved = localStorage.getItem(settingsKey) || localStorage.getItem(legacySettingsKey);
-  return saved ? { ...defaultSettings, ...JSON.parse(saved) } : { ...defaultSettings };
+  const settings = saved ? { ...defaultSettings, ...JSON.parse(saved) } : { ...defaultSettings };
+  return {
+    ...settings,
+    enabledSources: ["System Catalog"],
+  };
 }
 
 function saveSettings() {
@@ -845,7 +832,7 @@ function renderDetail(item) {
     <div class="detail-card">
       <span class="detail-label">Kullanım notu</span>
       <p>${escapeHtml(item.note)}</p>
-      <a class="source-link" href="${item.dictionaryUrl}" target="_blank" rel="noreferrer">${escapeHtml(item.title)}</a>
+      <span class="source-link">${escapeHtml(item.title)}</span>
     </div>
 
     <div class="review-actions">
