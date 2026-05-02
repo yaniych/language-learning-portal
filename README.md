@@ -21,5 +21,5 @@ The GitHub Pages workflow runs the same check before publishing.
 ## Notes
 
 - Vocabulary cards, manual entries, and settings are stored in the browser with `localStorage` and can be exported/imported as JSON.
-- The course catalog is built into `app.js`; no external API is required.
+- The course catalog and built-in vocabulary live in `data.js`; no external API is required.
 - Practice, daily phrases, progress, and saved-items views are rendered from the same local card data as the dictionary.

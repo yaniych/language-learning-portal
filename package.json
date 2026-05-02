@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "node --check app.js"
+    "test": "node --check data.js && node --check app.js"
   }
 }
