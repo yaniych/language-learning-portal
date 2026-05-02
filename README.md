@@ -1,8 +1,8 @@
 # Language Learning Portal
 
-An independent browser-based vocabulary and course workspace for saving, reviewing, filtering, and exporting language learning cards.
+An independent browser-based vocabulary and course workspace for saving, reviewing, and filtering language learning cards from the built-in course catalog.
 
-This project does not claim partnership, endorsement, or affiliation with any third-party language learning platform. Imports and saved cards are intended to be handled as user-provided data.
+This project does not claim partnership, endorsement, or affiliation with any third-party language learning platform.
 
 ## Run locally
 

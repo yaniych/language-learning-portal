@@ -275,10 +275,6 @@ const learningStat = document.querySelector("#learningStat");
 const reviewStat = document.querySelector("#reviewStat");
 const knownStat = document.querySelector("#knownStat");
 const clearFiltersButton = document.querySelector("#clearFiltersButton");
-const exportButton = document.querySelector("#exportButton");
-const importButton = document.querySelector("#importButton");
-const importFileInput = document.querySelector("#importFileInput");
-const importStatus = document.querySelector("#importStatus");
 const resetButton = document.querySelector("#resetButton");
 const themeButton = document.querySelector("#themeButton");
 const navItems = document.querySelectorAll(".nav-item");
@@ -530,14 +526,6 @@ function showSettingsStatus(message) {
   }, 1800);
 }
 
-function showImportStatus(message) {
-  importStatus.textContent = message;
-  window.clearTimeout(showImportStatus.timeoutId);
-  showImportStatus.timeoutId = window.setTimeout(() => {
-    importStatus.textContent = "";
-  }, 2600);
-}
-
 function switchView(view, activeItem) {
   navItems.forEach((item) => item.classList.toggle("active", item === activeItem));
   const showingSettings = view === "settings";
@@ -787,19 +775,16 @@ function renderEmptyList() {
     : `
       <div class="empty-list">
         <strong>Henüz kart yok</strong>
-        <p>Bir CSV/JSON dosyası içe aktar veya kurslardan başlangıç kartları ekle.</p>
+        <p>Kurslardan başlangıç kartları ekleyerek kendi sözlüğünü oluştur.</p>
         <div class="empty-actions">
-          <button class="primary-button" type="button" data-empty-action="import">İçe aktar</button>
-          <button class="icon-button" type="button" data-empty-action="courses">Kurslara git</button>
+          <button class="primary-button" type="button" data-empty-action="courses">Kurslara git</button>
         </div>
       </div>
     `;
 
   itemList.querySelectorAll("[data-empty-action]").forEach((button) => {
     button.addEventListener("click", () => {
-      if (button.dataset.emptyAction === "import") {
-        importFileInput.click();
-      } else if (button.dataset.emptyAction === "courses") {
+      if (button.dataset.emptyAction === "courses") {
         switchView("courses", document.querySelector('[data-view="courses"]'));
       } else {
         clearFilters();
@@ -908,242 +893,6 @@ function deleteItem(id) {
   renderList();
 }
 
-function handleImportFile(event) {
-  const file = event.target.files?.[0];
-  if (!file) {
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    try {
-      const importedRows = parseImportFile(String(reader.result || ""), file.name);
-      const importedItems = normalizeImportedRows(importedRows);
-      const existingKeys = new Set(items.map(getDuplicateKey));
-      const newItems = importedItems.filter((item) => {
-        const key = getDuplicateKey(item);
-        if (existingKeys.has(key)) {
-          return false;
-        }
-        existingKeys.add(key);
-        return true;
-      });
-
-      if (!newItems.length) {
-        showImportStatus("Yeni kart bulunamadı.");
-        return;
-      }
-
-      items = [...newItems, ...items];
-      selectedId = newItems[0].id;
-      saveItems();
-      renderList();
-      showImportStatus(`${newItems.length} kart içe aktarıldı.`);
-    } catch (error) {
-      showImportStatus(error.message || "Dosya okunamadı.");
-    } finally {
-      importFileInput.value = "";
-    }
-  });
-  reader.addEventListener("error", () => {
-    showImportStatus("Dosya okunamadı.");
-    importFileInput.value = "";
-  });
-  reader.readAsText(file);
-}
-
-function parseImportFile(content, fileName) {
-  if (fileName.toLowerCase().endsWith(".json")) {
-    const parsed = JSON.parse(content);
-    return Array.isArray(parsed) ? parsed : parsed.items || parsed.cards || parsed.data || [];
-  }
-
-  return parseCsv(content);
-}
-
-function parseCsv(content) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let inQuotes = false;
-
-  for (let index = 0; index < content.length; index += 1) {
-    const char = content[index];
-    const nextChar = content[index + 1];
-
-    if (char === '"' && inQuotes && nextChar === '"') {
-      cell += '"';
-      index += 1;
-    } else if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === "," && !inQuotes) {
-      row.push(cell);
-      cell = "";
-    } else if ((char === "\n" || char === "\r") && !inQuotes) {
-      if (char === "\r" && nextChar === "\n") {
-        index += 1;
-      }
-      row.push(cell);
-      if (row.some((value) => value.trim())) {
-        rows.push(row);
-      }
-      row = [];
-      cell = "";
-    } else {
-      cell += char;
-    }
-  }
-
-  row.push(cell);
-  if (row.some((value) => value.trim())) {
-    rows.push(row);
-  }
-
-  if (!rows.length) {
-    return [];
-  }
-
-  const headers = rows[0].map((header) => normalizeHeader(header));
-  return rows.slice(1).map((values) => {
-    const record = {};
-    headers.forEach((header, index) => {
-      record[header] = values[index] || "";
-    });
-    return record;
-  });
-}
-
-function normalizeImportedRows(rows) {
-  if (!Array.isArray(rows) || !rows.length) {
-    throw new Error("İçe aktarılacak kart bulunamadı.");
-  }
-
-  const importedItems = rows
-    .map((row, index) => normalizeImportedItem(row, index))
-    .filter(Boolean);
-
-  if (!importedItems.length) {
-    throw new Error("Geçerli kart bulunamadı.");
-  }
-
-  return importedItems;
-}
-
-function normalizeImportedItem(row, index) {
-  const term = getImportValue(row, ["term", "word", "phrase", "text", "front", "sourceText", "kelime", "kalip"]);
-  const translation = getImportValue(row, ["translation", "meaning", "definition", "back", "targetText", "ceviri", "anlam"]);
-
-  if (!term || !translation) {
-    return null;
-  }
-
-  const language = normalizeLanguage(getImportValue(row, ["language", "lang", "dil"])) || userSettings.defaultCourse;
-  const phrase = getImportValue(row, ["example", "sentence", "context", "phraseExample", "ornek"]) || term;
-  const phraseTranslation = getImportValue(row, ["exampleTranslation", "sentenceTranslation", "contextTranslation", "phraseTranslation", "ornekCeviri"]) || translation;
-  const source = getImportValue(row, ["source", "provider", "dictionary", "kaynak"]) || "User import";
-  const importedId = getImportValue(row, ["id", "cardId"]);
-
-  return {
-    id: importedId || `import-${Date.now()}-${index}`,
-    type: term.trim().split(/\s+/).length > 1 ? "phrase" : "word",
-    term: term.trim(),
-    translation: translation.trim(),
-    phrase: phrase.trim(),
-    phraseTranslation: phraseTranslation.trim(),
-    language,
-    source: source.trim(),
-    title: source.trim(),
-    savedAt: "Today",
-    level: normalizeLevel(getImportValue(row, ["status", "level", "state", "durum"])) || "Learning",
-    note: getImportValue(row, ["note", "notes", "comment", "not"]) || "Kullanıcı tarafından içe aktarıldı.",
-    dictionaryUrl: getImportValue(row, ["dictionaryUrl", "url", "link"]) || "#",
-  };
-}
-
-function getImportValue(row, keys) {
-  for (const key of keys) {
-    const normalizedKey = normalizeHeader(key);
-    const value = row?.[key] ?? row?.[normalizedKey];
-    if (value !== undefined && String(value).trim()) {
-      return String(value).trim();
-    }
-  }
-  return "";
-}
-
-function normalizeHeader(value) {
-  return normalize(String(value || "")).replace(/[^a-z0-9]/g, "");
-}
-
-function normalizeLanguage(value) {
-  const language = normalize(value);
-  const aliases = {
-    russian: "Russian",
-    rusca: "Russian",
-    ru: "Russian",
-    english: "English",
-    ingilizce: "English",
-    en: "English",
-    spanish: "Spanish",
-    ispanyolca: "Spanish",
-    es: "Spanish",
-    german: "German",
-    almanca: "German",
-    de: "German",
-    french: "French",
-    fransizca: "French",
-    fr: "French",
-  };
-  return aliases[language] || "";
-}
-
-function normalizeLevel(value) {
-  const level = normalize(value);
-  const aliases = {
-    learning: "Learning",
-    ogreniliyor: "Learning",
-    new: "Learning",
-    review: "Review",
-    tekrar: "Review",
-    known: "Known",
-    bilinen: "Known",
-  };
-  return aliases[level] || "";
-}
-
-function getDuplicateKey(item) {
-  return normalize(`${item.language}|${item.term}|${item.translation}`);
-}
-
-function exportCsv() {
-  const rows = getFilteredItems();
-  const header = [
-    "term",
-    "translation",
-    "phrase",
-    "phraseTranslation",
-    "language",
-    "source",
-    "status",
-    "dictionaryUrl",
-  ];
-  const csv = [header, ...rows.map((item) => header.map((key) => item[key === "status" ? "level" : key]))]
-    .map((row) => row.map(csvCell).join(","))
-    .join("\n");
-
-  const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "language-learning-portal-saved-items.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function csvCell(value) {
-  return `"${String(value ?? "").replaceAll('"', '""')}"`;
-}
-
 function highlightTerm(phrase, term) {
   const safePhrase = escapeHtml(phrase);
   const firstWord = term.split(/\s+/)[0];
@@ -1188,9 +937,6 @@ function clearFilters() {
 }
 
 clearFiltersButton.addEventListener("click", clearFilters);
-exportButton.addEventListener("click", exportCsv);
-importButton.addEventListener("click", () => importFileInput.click());
-importFileInput.addEventListener("change", handleImportFile);
 resetButton.addEventListener("click", () => {
   items = [];
   selectedId = null;
