@@ -754,6 +754,27 @@ button:focus-visible {
   text-align: center;
 }
 
+.empty-list strong {
+  color: var(--ink);
+  display: block;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.empty-list p {
+  margin: 0 auto;
+  max-width: 360px;
+  line-height: 1.45;
+}
+
+.empty-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .hidden {
   display: none !important;
 }

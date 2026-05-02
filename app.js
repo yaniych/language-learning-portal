@@ -742,12 +742,7 @@ function renderList() {
   renderStats(filteredItems);
 
   if (!filteredItems.length) {
-    itemList.innerHTML = `
-      <div class="empty-list">
-        <strong>Henüz kart yok</strong>
-        <p>Kursa başladığında kelimeler sözlüğüne eklenecek.</p>
-      </div>
-    `;
+    renderEmptyList();
     renderDetail(null);
     return;
   }
@@ -775,6 +770,42 @@ function renderList() {
   });
 
   renderDetail(items.find((item) => item.id === selectedId));
+}
+
+function renderEmptyList() {
+  const hasCards = items.length > 0;
+  itemList.innerHTML = hasCards
+    ? `
+      <div class="empty-list">
+        <strong>Sonuç bulunamadı</strong>
+        <p>Arama, dil, kaynak veya kart tipi filtrelerini değiştir.</p>
+        <div class="empty-actions">
+          <button class="icon-button" type="button" data-empty-action="clear">Filtreleri temizle</button>
+        </div>
+      </div>
+    `
+    : `
+      <div class="empty-list">
+        <strong>Henüz kart yok</strong>
+        <p>Bir CSV/JSON dosyası içe aktar veya kurslardan başlangıç kartları ekle.</p>
+        <div class="empty-actions">
+          <button class="primary-button" type="button" data-empty-action="import">İçe aktar</button>
+          <button class="icon-button" type="button" data-empty-action="courses">Kurslara git</button>
+        </div>
+      </div>
+    `;
+
+  itemList.querySelectorAll("[data-empty-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.emptyAction === "import") {
+        importFileInput.click();
+      } else if (button.dataset.emptyAction === "courses") {
+        switchView("courses", document.querySelector('[data-view="courses"]'));
+      } else {
+        clearFilters();
+      }
+    });
+  });
 }
 
 function renderStats(filteredItems) {
@@ -1146,7 +1177,7 @@ searchInput.addEventListener("input", renderList);
 languageFilter.addEventListener("change", renderList);
 sourceFilter.addEventListener("change", renderList);
 sortSelect.addEventListener("change", renderList);
-clearFiltersButton.addEventListener("click", () => {
+function clearFilters() {
   searchInput.value = "";
   languageFilter.value = "all";
   sourceFilter.value = "all";
@@ -1154,7 +1185,9 @@ clearFiltersButton.addEventListener("click", () => {
   segments.forEach((button) => button.classList.toggle("active", button.dataset.type === "all"));
   activeType = "all";
   renderList();
-});
+}
+
+clearFiltersButton.addEventListener("click", clearFilters);
 exportButton.addEventListener("click", exportCsv);
 importButton.addEventListener("click", () => importFileInput.click());
 importFileInput.addEventListener("change", handleImportFile);
