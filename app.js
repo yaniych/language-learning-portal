@@ -257,7 +257,8 @@ const resourceDictionary = [
 ];
 
 const seedItems = [];
-const storageKey = "lexideck-saved-items-v3";
+const storageKey = "language-learning-portal-saved-items-v1";
+const legacyStorageKey = "lexideck-saved-items-v3";
 let items = loadItems();
 let selectedId = items[0]?.id ?? null;
 let activeType = "all";
@@ -305,8 +306,10 @@ const currentLanguageFlag = document.querySelector("#currentLanguageFlag");
 const currentLanguageName = document.querySelector("#currentLanguageName");
 const itemTemplate = document.querySelector("#itemTemplate");
 const segments = document.querySelectorAll(".segment");
-const themeKey = "lexideck-theme";
-const settingsKey = "lexideck-settings";
+const themeKey = "language-learning-portal-theme";
+const legacyThemeKey = "lexideck-theme";
+const settingsKey = "language-learning-portal-settings";
+const legacySettingsKey = "lexideck-settings";
 const courseCatalog = [
   {
     id: "ru-fourman-alphabet",
@@ -440,7 +443,7 @@ const savedAtLabels = {
 let userSettings = loadSettings();
 
 function loadItems() {
-  const saved = localStorage.getItem(storageKey);
+  const saved = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey);
   return saved ? JSON.parse(saved) : seedItems;
 }
 
@@ -449,7 +452,7 @@ function saveItems() {
 }
 
 function loadSettings() {
-  const saved = localStorage.getItem(settingsKey);
+  const saved = localStorage.getItem(settingsKey) || localStorage.getItem(legacySettingsKey);
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : { ...defaultSettings };
 }
 
@@ -993,6 +996,6 @@ segments.forEach((segment) => {
   });
 });
 
-userSettings.theme = localStorage.getItem(themeKey) || userSettings.theme;
+userSettings.theme = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey) || userSettings.theme;
 applySettings();
 switchView("deck", document.querySelector(".nav-item.active"));
