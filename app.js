@@ -1163,6 +1163,9 @@ function getDateStamp(offsetDays) {
 }
 
 function deleteItem(id) {
+  if (!window.confirm("Bu kart silinsin mi?")) {
+    return;
+  }
   items = items.filter((item) => item.id !== id);
   selectedId = getFilteredItems()[0]?.id ?? items[0]?.id ?? null;
   saveItems();
@@ -1214,6 +1217,9 @@ function clearFilters() {
 
 clearFiltersButton.addEventListener("click", clearFilters);
 resetButton.addEventListener("click", () => {
+  if (!window.confirm("Sözlükteki tüm kartlar temizlensin mi?")) {
+    return;
+  }
   items = [];
   selectedId = null;
   saveItems();
