@@ -7,3 +7,19 @@ This project does not claim partnership, endorsement, or affiliation with any th
 ## Run locally
 
 Open `index.html` in a browser.
+
+## Quality checks
+
+Run the JavaScript syntax check before deploying:
+
+```sh
+npm test
+```
+
+The GitHub Pages workflow runs the same check before publishing.
+
+## Notes
+
+- Vocabulary cards and settings are stored in the browser with `localStorage`.
+- The course catalog is built into `app.js`; no external API is required.
+- Practice, daily phrases, progress, and saved-items views currently show dedicated "coming soon" states instead of reusing the dictionary screen.

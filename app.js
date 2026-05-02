@@ -435,6 +435,12 @@ const settingsView = document.querySelector("#settingsView");
 const coursesView = document.querySelector("#coursesView");
 const lessonView = document.querySelector("#lessonView");
 const resourcesView = document.querySelector("#resourcesView");
+const featureView = document.querySelector("#featureView");
+const featureEyebrow = document.querySelector("#featureEyebrow");
+const featureTitle = document.querySelector("#featureTitle");
+const featureSubtitle = document.querySelector("#featureSubtitle");
+const featureDescription = document.querySelector("#featureDescription");
+const featureActionButton = document.querySelector("#featureActionButton");
 const courseList = document.querySelector("#courseList");
 const coursesTitle = document.querySelector("#coursesTitle");
 const courseLanguageFlag = document.querySelector("#courseLanguageFlag");
@@ -601,28 +607,100 @@ const savedAtLabels = {
   Today: "Bugün",
   Yesterday: "Dün",
 };
+const featureMessages = {
+  practice: {
+    eyebrow: "Pratik",
+    title: "Pratik akışı hazırlanıyor",
+    subtitle: "Kart tekrarlarını yakında ayrı bir oturumda çalışabileceksin.",
+    description: "Şimdilik sözlükte kart seçip Biliyorum, Tekrar veya Öğreniyorum durumlarıyla tekrar planını güncelleyebilirsin.",
+  },
+  phrases: {
+    eyebrow: "Günlük kalıplar",
+    title: "Kalıp çalışmaları hazırlanıyor",
+    subtitle: "Günlük konuşma kalıpları için ayrı bir görünüm planlandı.",
+    description: "Kurslardan eklediğin kalıplar şimdilik sözlükte ve ders kartlarında görünür.",
+  },
+  progress: {
+    eyebrow: "İlerleme",
+    title: "İlerleme raporu hazırlanıyor",
+    subtitle: "XP, tekrar geçmişi ve kurs tamamlama verileri ayrı bir raporda toplanacak.",
+    description: "Mevcut günlük hedef ve kart durumları sözlük ekranında takip edilebilir.",
+  },
+  saved: {
+    eyebrow: "Kaydedilenler",
+    title: "Kaydedilenler görünümü hazırlanıyor",
+    subtitle: "Kaydettiğin kartlar için ayrı bir kütüphane ekranı eklenecek.",
+    description: "Tüm kayıtlı kartlar şu anda ana sözlük ekranındaki filtrelerle yönetiliyor.",
+  },
+};
 let userSettings = loadSettings();
 
 function loadItems() {
-  const saved = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey);
-  return saved ? JSON.parse(saved) : seedItems;
+  const saved = getStoredItem(storageKey) || getStoredItem(legacyStorageKey);
+  const parsedItems = parseStoredJson(saved, seedItems, "saved items");
+  return Array.isArray(parsedItems) ? parsedItems : seedItems;
 }
 
 function saveItems() {
-  localStorage.setItem(storageKey, JSON.stringify(items));
+  saveJson(storageKey, items, "saved items");
 }
 
 function loadSettings() {
-  const saved = localStorage.getItem(settingsKey) || localStorage.getItem(legacySettingsKey);
-  const settings = saved ? { ...defaultSettings, ...JSON.parse(saved) } : { ...defaultSettings };
+  const saved = getStoredItem(settingsKey) || getStoredItem(legacySettingsKey);
+  const storedSettings = parseStoredJson(saved, {}, "settings");
+  const settings = { ...defaultSettings, ...(storedSettings && typeof storedSettings === "object" ? storedSettings : {}) };
   return {
     ...settings,
-    enabledSources: ["System Catalog"],
+    enabledSources: normalizeEnabledSources(settings.enabledSources),
   };
 }
 
 function saveSettings() {
-  localStorage.setItem(settingsKey, JSON.stringify(userSettings));
+  saveJson(settingsKey, userSettings, "settings");
+}
+
+function getStoredItem(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    console.warn(`Could not read ${key}.`, error);
+    return null;
+  }
+}
+
+function parseStoredJson(value, fallback, label) {
+  if (!value) {
+    return fallback;
+  }
+
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn(`Ignoring invalid ${label} data.`, error);
+    return fallback;
+  }
+}
+
+function saveJson(key, value, label) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`Could not save ${label}.`, error);
+  }
+}
+
+function setStoredItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn(`Could not save ${key}.`, error);
+  }
+}
+
+function normalizeEnabledSources(sources) {
+  const availableSources = new Set(resourceDictionary.map((item) => item.source));
+  const selectedSources = Array.isArray(sources) ? sources.filter((source) => availableSources.has(source)) : [];
+  return selectedSources.length ? selectedSources : [...defaultSettings.enabledSources];
 }
 
 function applyTheme(theme) {
@@ -632,7 +710,7 @@ function applyTheme(theme) {
   if (themeSelect) {
     themeSelect.value = theme;
   }
-  localStorage.setItem(themeKey, theme);
+  setStoredItem(themeKey, theme);
 }
 
 function applySettings() {
@@ -698,17 +776,30 @@ function switchView(view, activeItem) {
   const showingCourses = view === "courses";
   const showingLesson = view === "lesson";
   const showingResources = view === "resources";
-  deckViews.forEach((element) => element.classList.toggle("hidden", showingSettings || showingCourses || showingLesson || showingResources));
+  const showingFeature = Object.prototype.hasOwnProperty.call(featureMessages, view);
+  deckViews.forEach((element) => element.classList.toggle("hidden", showingSettings || showingCourses || showingLesson || showingResources || showingFeature));
   settingsView.classList.toggle("hidden", !showingSettings);
   coursesView.classList.toggle("hidden", !showingCourses);
   lessonView.classList.toggle("hidden", !showingLesson);
   resourcesView.classList.toggle("hidden", !showingResources);
+  featureView.classList.toggle("hidden", !showingFeature);
   if (showingCourses) {
     renderCourses();
   }
   if (showingLesson) {
     renderLesson();
   }
+  if (showingFeature) {
+    renderFeature(view);
+  }
+}
+
+function renderFeature(view) {
+  const message = featureMessages[view] || featureMessages.practice;
+  featureEyebrow.textContent = message.eyebrow;
+  featureTitle.textContent = message.title;
+  featureSubtitle.textContent = message.subtitle;
+  featureDescription.textContent = message.description;
 }
 
 function renderCourses() {
@@ -926,10 +1017,10 @@ function sortItems(itemList) {
 
 function getSavedRank(savedAt) {
   if (savedAt === "Today") {
-    return 20260428;
+    return Number(getDateStamp(0).replaceAll("-", ""));
   }
   if (savedAt === "Yesterday") {
-    return 20260427;
+    return Number(getDateStamp(-1).replaceAll("-", ""));
   }
 
   const match = /^([A-Za-z]{3})\s+(\d{1,2})$/.exec(savedAt);
@@ -1108,10 +1199,32 @@ function renderDetail(item) {
 function copyPhrase(item) {
   const text = `${item.phrase} - ${item.phraseTranslation}`;
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text)
+      .then(() => showCopyStatus("Kalip kopyalandi."))
+      .catch(() => promptCopy(text));
     return;
   }
+  promptCopy(text);
+}
+
+function promptCopy(text) {
   window.prompt("Kalibi kopyala", text);
+  showCopyStatus("Kalibi elle kopyalayabilirsin.");
+}
+
+function showCopyStatus(message) {
+  const button = detailPanel.querySelector("[data-copy]");
+  if (!button) {
+    return;
+  }
+
+  const originalText = button.dataset.originalText || button.textContent;
+  button.dataset.originalText = originalText;
+  button.textContent = message;
+  window.clearTimeout(showCopyStatus.timeoutId);
+  showCopyStatus.timeoutId = window.setTimeout(() => {
+    button.textContent = originalText;
+  }, 1600);
 }
 
 function selectNextCard() {
@@ -1239,6 +1352,9 @@ languageMenu.querySelectorAll("[data-language]").forEach((button) => {
 openDictionaryButton.addEventListener("click", () => {
   switchView("deck", document.querySelector('[data-view="deck"]'));
 });
+featureActionButton.addEventListener("click", () => {
+  switchView("courses", document.querySelector('[data-view="courses"]'));
+});
 backToCoursesButton.addEventListener("click", () => {
   switchView("courses", document.querySelector('[data-view="courses"]'));
 });
@@ -1285,6 +1401,6 @@ segments.forEach((segment) => {
   });
 });
 
-userSettings.theme = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey) || userSettings.theme;
+userSettings.theme = getStoredItem(themeKey) || getStoredItem(legacyThemeKey) || userSettings.theme;
 applySettings();
 switchView("deck", document.querySelector(".nav-item.active"));

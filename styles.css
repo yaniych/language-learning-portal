@@ -276,6 +276,7 @@ label span,
 .resources-header,
 .resource-card,
 .settings-header,
+.feature-header,
 .settings-card {
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   border: 1px solid var(--line);
@@ -286,7 +287,8 @@ label span,
 .courses-header,
 .lesson-header,
 .resources-header,
-.settings-header {
+.settings-header,
+.feature-header {
   border-radius: 18px;
   padding: 22px;
   display: flex;
@@ -320,6 +322,12 @@ label span,
 }
 
 .resources-header h1 {
+  margin: 2px 0 0;
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.feature-header h1 {
   margin: 2px 0 0;
   font-size: 34px;
   line-height: 1.05;
@@ -790,6 +798,13 @@ button:focus-visible {
   gap: 16px;
 }
 
+.feature-view {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+}
+
 .course-layout {
   min-height: 0;
   display: grid;
@@ -1037,6 +1052,28 @@ button:focus-visible {
   gap: 16px;
 }
 
+.feature-panel {
+  border-radius: 18px;
+  padding: 20px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.feature-panel h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.feature-panel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .settings-card h2 {
   margin: 4px 0 0;
   font-size: 22px;
@@ -1142,8 +1179,10 @@ button:focus-visible {
 
   .topbar,
   .courses-header,
+  .lesson-header,
   .resources-header,
-  .settings-header {
+  .settings-header,
+  .feature-header {
     align-items: stretch;
     flex-direction: column;
   }

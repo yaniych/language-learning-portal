@@ -30,13 +30,13 @@
           <span class="nav-label">Öğren</span>
           <a href="#" class="nav-item active" data-view="deck"><span class="nav-icon">Ev</span><span>Ana sayfa</span></a>
           <a href="#" class="nav-item" data-view="courses"><span class="nav-icon">Ku</span><span>Kurslar</span></a>
-          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Pr</span><span>Pratik</span></a>
-          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Kp</span><span>Günlük kalıplar</span></a>
-          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">İl</span><span>İlerleme</span></a>
+          <a href="#" class="nav-item" data-view="practice"><span class="nav-icon">Pr</span><span>Pratik</span></a>
+          <a href="#" class="nav-item" data-view="phrases"><span class="nav-icon">Kp</span><span>Günlük kalıplar</span></a>
+          <a href="#" class="nav-item" data-view="progress"><span class="nav-icon">İl</span><span>İlerleme</span></a>
           <span class="nav-label">Kütüphane</span>
           <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Sö</span><span>Sözlük</span></a>
           <a href="#" class="nav-item" data-view="resources"><span class="nav-icon">Ka</span><span>Kaynaklar</span></a>
-          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Ky</span><span>Kaydedilenler</span></a>
+          <a href="#" class="nav-item" data-view="saved"><span class="nav-icon">Ky</span><span>Kaydedilenler</span></a>
           <a href="#" class="nav-item" data-view="settings"><span class="nav-icon">Ay</span><span>Ayarlar</span></a>
         </nav>
 
@@ -290,6 +290,22 @@
               <p class="settings-status" id="settingsStatus" aria-live="polite"></p>
             </article>
           </div>
+        </section>
+
+        <section class="feature-view hidden" id="featureView" aria-label="Yakında">
+          <header class="feature-header">
+            <div>
+              <p class="eyebrow" id="featureEyebrow">Yakında</p>
+              <h1 id="featureTitle">Bölüm hazırlanıyor</h1>
+            </div>
+            <button class="primary-button" id="featureActionButton" type="button">Kurslara git</button>
+          </header>
+
+          <article class="feature-panel">
+            <span class="detail-label">Durum</span>
+            <h2 id="featureSubtitle">Bu bölüm için ayrı akış hazırlanıyor.</h2>
+            <p id="featureDescription">Şimdilik kurslardan kart ekleyip sözlükte tekrar yapabilirsin.</p>
+          </article>
         </section>
       </main>
     </div>
