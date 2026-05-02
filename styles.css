@@ -1225,6 +1225,12 @@ button:focus-visible {
   font-weight: 700;
 }
 
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .settings-status {
   min-height: 20px;
   font-weight: 800;

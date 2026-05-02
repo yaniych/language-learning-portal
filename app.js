@@ -463,6 +463,9 @@ const lessonStatus = document.querySelector("#lessonStatus");
 const saveSettingsButton = document.querySelector("#saveSettingsButton");
 const resetSettingsButton = document.querySelector("#resetSettingsButton");
 const settingsStatus = document.querySelector("#settingsStatus");
+const exportDataButton = document.querySelector("#exportDataButton");
+const importDataButton = document.querySelector("#importDataButton");
+const importDataInput = document.querySelector("#importDataInput");
 const themeSelect = document.querySelector("#themeSelect");
 const compactListToggle = document.querySelector("#compactListToggle");
 const defaultCourseSelect = document.querySelector("#defaultCourseSelect");
@@ -686,6 +689,44 @@ function loadSettings() {
 
 function saveSettings() {
   saveJson(settingsKey, userSettings, "settings");
+}
+
+function getBackupPayload() {
+  return {
+    app: "language-learning-portal",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    items,
+    settings: userSettings,
+  };
+}
+
+function validateBackupPayload(payload) {
+  if (!payload || payload.app !== "language-learning-portal" || !Array.isArray(payload.items) || !payload.settings) {
+    return null;
+  }
+
+  const importedItems = payload.items
+    .filter((item) => item && item.id && item.term && item.translation && item.language && item.source)
+    .map((item) => ({
+      ...item,
+      type: item.type === "phrase" ? "phrase" : "word",
+      source: item.source === manualSource ? manualSource : item.source,
+      level: statusLabels[item.level] ? item.level : "Learning",
+    }));
+  const availableSources = new Set([...resourceDictionary, ...importedItems].map((item) => item.source));
+  const importedSources = Array.isArray(payload.settings.enabledSources)
+    ? payload.settings.enabledSources.filter((source) => availableSources.has(source))
+    : [];
+
+  return {
+    items: importedItems,
+    settings: {
+      ...defaultSettings,
+      ...payload.settings,
+      enabledSources: importedSources.length ? importedSources : [...defaultSettings.enabledSources],
+    },
+  };
 }
 
 function getStoredItem(key) {
@@ -1320,6 +1361,55 @@ function addManualCard(event) {
   closeCardDialog();
 }
 
+function exportData() {
+  const payload = JSON.stringify(getBackupPayload(), null, 2);
+  const blob = new Blob([payload], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `language-learning-portal-${getDateStamp(0)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showSettingsStatus("Veri dışa aktarıldı.");
+}
+
+function openImportPicker() {
+  importDataInput.value = "";
+  importDataInput.click();
+}
+
+function importData(event) {
+  const file = event.target.files?.[0];
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const payload = validateBackupPayload(JSON.parse(String(reader.result)));
+      if (!payload) {
+        showSettingsStatus("Geçerli yedek dosyası değil.");
+        return;
+      }
+
+      items = payload.items;
+      userSettings = payload.settings;
+      selectedId = items[0]?.id ?? null;
+      saveItems();
+      saveSettings();
+      applySettings();
+      showSettingsStatus(`${items.length} kart içe aktarıldı.`);
+    } catch (error) {
+      console.warn("Could not import data.", error);
+      showSettingsStatus("İçe aktarma başarısız.");
+    }
+  });
+  reader.readAsText(file);
+}
+
 function previewCourse(courseId) {
   const course = courseCatalog.find((item) => item.id === courseId);
   if (!course) {
@@ -1755,6 +1845,9 @@ saveSettingsButton.addEventListener("click", () => {
   applySettings();
   showSettingsStatus("Ayarlar kaydedildi.");
 });
+exportDataButton.addEventListener("click", exportData);
+importDataButton.addEventListener("click", openImportPicker);
+importDataInput.addEventListener("change", importData);
 resetSettingsButton.addEventListener("click", () => {
   userSettings = { ...defaultSettings };
   saveSettings();
