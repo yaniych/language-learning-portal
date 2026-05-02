@@ -417,6 +417,7 @@ let currentLessonId = null;
 let lessonQuizIndex = 0;
 let lessonQuizScore = 0;
 let lessonQuizAnswered = false;
+let editingCardId = null;
 
 const itemList = document.querySelector("#itemList");
 const detailPanel = document.querySelector("#detailPanel");
@@ -493,6 +494,8 @@ const itemTemplate = document.querySelector("#itemTemplate");
 const segments = document.querySelectorAll(".segment");
 const cardDialog = document.querySelector("#cardDialog");
 const cardForm = document.querySelector("#cardForm");
+const cardDialogTitle = document.querySelector("#cardDialogTitle");
+const cardSubmitButton = document.querySelector("#cardSubmitButton");
 const closeCardDialogButton = document.querySelector("#closeCardDialogButton");
 const cardLanguageInput = document.querySelector("#cardLanguageInput");
 const cardTypeInput = document.querySelector("#cardTypeInput");
@@ -1350,16 +1353,45 @@ function addCourseToDictionary(courseId) {
 }
 
 function openCardDialog() {
+  editingCardId = null;
   cardForm.reset();
   cardFormStatus.textContent = "";
+  cardDialogTitle.textContent = "Yeni kart";
+  cardSubmitButton.textContent = "Kartı ekle";
   cardLanguageInput.value = userSettings.defaultCourse;
   cardTypeInput.value = "word";
+  showCardDialog();
+  cardTermInput.focus();
+}
+
+function openEditCardDialog(id) {
+  const item = items.find((card) => card.id === id);
+  if (!item) {
+    return;
+  }
+
+  editingCardId = id;
+  cardForm.reset();
+  cardFormStatus.textContent = "";
+  cardDialogTitle.textContent = "Kartı düzenle";
+  cardSubmitButton.textContent = "Değişiklikleri kaydet";
+  cardLanguageInput.value = item.language;
+  cardTypeInput.value = item.type;
+  cardTermInput.value = item.term;
+  cardTranslationInput.value = item.translation;
+  cardPhraseInput.value = item.phrase;
+  cardPhraseTranslationInput.value = item.phraseTranslation;
+  cardNoteInput.value = item.note || "";
+  showCardDialog();
+  cardTermInput.focus();
+}
+
+function showCardDialog() {
   if (typeof cardDialog.showModal === "function") {
     cardDialog.showModal();
   } else {
     cardDialog.setAttribute("open", "");
   }
-  cardTermInput.focus();
 }
 
 function closeCardDialog() {
@@ -1370,7 +1402,7 @@ function closeCardDialog() {
   }
 }
 
-function addManualCard(event) {
+function saveCardForm(event) {
   event.preventDefault();
   const term = cardTermInput.value.trim();
   const translation = cardTranslationInput.value.trim();
@@ -1384,9 +1416,14 @@ function addManualCard(event) {
     return;
   }
 
-  const duplicate = [...items, ...resourceDictionary].some((item) => item.language === language && normalize(item.term) === normalize(term));
+  const duplicate = [...items, ...resourceDictionary].some((item) => item.id !== editingCardId && item.language === language && normalize(item.term) === normalize(term));
   if (duplicate) {
     cardFormStatus.textContent = "Bu dilde aynı kart zaten var.";
+    return;
+  }
+
+  if (editingCardId) {
+    updateCardFromForm(editingCardId, { term, translation, phrase, phraseTranslation, language, type });
     return;
   }
 
@@ -1415,6 +1452,28 @@ function addManualCard(event) {
   renderSourceFilter();
   renderStudyDashboard();
   clearFilters();
+  closeCardDialog();
+}
+
+function updateCardFromForm(id, formValues) {
+  const existingItem = items.find((item) => item.id === id);
+  if (!existingItem) {
+    cardFormStatus.textContent = "Kart bulunamadı.";
+    return;
+  }
+
+  items = items.map((item) => item.id === id
+    ? {
+      ...item,
+      ...formValues,
+      note: cardNoteInput.value.trim() || item.note || "Kullanıcı tarafından güncellenen kart.",
+    }
+    : item);
+  selectedId = id;
+  saveItems();
+  renderSourceFilter();
+  renderStudyDashboard();
+  renderList();
   closeCardDialog();
 }
 
@@ -1700,6 +1759,7 @@ function renderDetail(item) {
       <button class="known" type="button" data-level="Known">Biliyorum</button>
       <button type="button" data-level="Review">Tekrar</button>
       <button class="again" type="button" data-level="Learning">Öğreniyorum</button>
+      <button type="button" data-edit="true">Düzenle</button>
       <button type="button" data-delete="true">Sil</button>
     </div>
   `;
@@ -1709,6 +1769,7 @@ function renderDetail(item) {
   });
   detailPanel.querySelector("[data-copy]").addEventListener("click", () => copyPhrase(item));
   detailPanel.querySelector("[data-next]").addEventListener("click", selectNextCard);
+  detailPanel.querySelector("[data-edit]").addEventListener("click", () => openEditCardDialog(item.id));
   detailPanel.querySelector("[data-delete]").addEventListener("click", () => deleteItem(item.id));
 }
 
@@ -1851,7 +1912,7 @@ clearFiltersButton.addEventListener("click", clearFilters);
 newCardButton.addEventListener("click", openCardDialog);
 addQuickCardButton.addEventListener("click", openCardDialog);
 closeCardDialogButton.addEventListener("click", closeCardDialog);
-cardForm.addEventListener("submit", addManualCard);
+cardForm.addEventListener("submit", saveCardForm);
 resetButton.addEventListener("click", () => {
   if (!window.confirm("Sözlükteki tüm kartlar temizlensin mi?")) {
     return;
