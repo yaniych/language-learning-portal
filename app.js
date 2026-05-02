@@ -431,6 +431,7 @@ const reviewStat = document.querySelector("#reviewStat");
 const knownStat = document.querySelector("#knownStat");
 const clearFiltersButton = document.querySelector("#clearFiltersButton");
 const resetButton = document.querySelector("#resetButton");
+const newCardButton = document.querySelector("#newCardButton");
 const themeButton = document.querySelector("#themeButton");
 const navItems = document.querySelectorAll(".nav-item");
 const deckViews = document.querySelectorAll(".deck-view");
@@ -477,10 +478,22 @@ const currentLanguageFlag = document.querySelector("#currentLanguageFlag");
 const currentLanguageName = document.querySelector("#currentLanguageName");
 const itemTemplate = document.querySelector("#itemTemplate");
 const segments = document.querySelectorAll(".segment");
+const cardDialog = document.querySelector("#cardDialog");
+const cardForm = document.querySelector("#cardForm");
+const closeCardDialogButton = document.querySelector("#closeCardDialogButton");
+const cardLanguageInput = document.querySelector("#cardLanguageInput");
+const cardTypeInput = document.querySelector("#cardTypeInput");
+const cardTermInput = document.querySelector("#cardTermInput");
+const cardTranslationInput = document.querySelector("#cardTranslationInput");
+const cardPhraseInput = document.querySelector("#cardPhraseInput");
+const cardPhraseTranslationInput = document.querySelector("#cardPhraseTranslationInput");
+const cardNoteInput = document.querySelector("#cardNoteInput");
+const cardFormStatus = document.querySelector("#cardFormStatus");
 const themeKey = "language-learning-portal-theme";
 const legacyThemeKey = "lexideck-theme";
 const settingsKey = "language-learning-portal-settings";
 const legacySettingsKey = "lexideck-settings";
+const manualSource = "Manual Entry";
 const courseCatalog = [
   {
     id: "ru-fourman-alphabet",
@@ -586,7 +599,7 @@ const defaultSettings = {
   compactList: false,
   defaultCourse: "Russian",
   dailyGoal: 20,
-  enabledSources: ["System Catalog"],
+  enabledSources: ["System Catalog", manualSource],
 };
 const languageFlags = {
   Russian: "flag-russian",
@@ -601,6 +614,10 @@ const languageLabels = {
   Spanish: "İspanyolca",
   German: "Almanca",
   French: "Fransızca",
+};
+const sourceLabels = {
+  "System Catalog": "Sistem kataloğu",
+  "Manual Entry": "Kendi kartlarım",
 };
 const statusLabels = {
   Learning: "Öğreniliyor",
@@ -710,9 +727,23 @@ function setStoredItem(key, value) {
 }
 
 function normalizeEnabledSources(sources) {
-  const availableSources = new Set(resourceDictionary.map((item) => item.source));
+  const availableSources = new Set([...resourceDictionary, ...items].map((item) => item.source));
   const selectedSources = Array.isArray(sources) ? sources.filter((source) => availableSources.has(source)) : [];
   return selectedSources.length ? selectedSources : [...defaultSettings.enabledSources];
+}
+
+function getAvailableSources() {
+  return [...new Set([...resourceDictionary, ...items].map((item) => item.source))];
+}
+
+function renderSourceFilter() {
+  const currentSource = sourceFilter.value;
+  const sources = getAvailableSources();
+  sourceFilter.innerHTML = `
+    <option value="all">Tüm kaynaklar</option>
+    ${sources.map((source) => `<option value="${escapeHtml(source)}">${escapeHtml(sourceLabels[source] || source)}</option>`).join("")}
+  `;
+  sourceFilter.value = currentSource === "all" || sources.includes(currentSource) ? currentSource : "all";
 }
 
 function applyTheme(theme) {
@@ -732,6 +763,7 @@ function applySettings() {
   updateLanguageSwitcher(userSettings.defaultCourse);
   dailyGoalInput.value = userSettings.dailyGoal;
   compactListToggle.checked = userSettings.compactList;
+  renderSourceFilter();
 
   sourceToggles.forEach((toggle) => {
     toggle.checked = userSettings.enabledSources.includes(toggle.value);
@@ -969,7 +1001,7 @@ function renderSavedFeature() {
             <h3>${escapeHtml(item.term)}</h3>
             <p>${escapeHtml(item.translation)}</p>
           </div>
-          <small>${escapeHtml(item.source)} · ${escapeHtml(savedAtLabels[item.savedAt] || item.savedAt)}</small>
+          <small>${escapeHtml(sourceLabels[item.source] || item.source)} · ${escapeHtml(savedAtLabels[item.savedAt] || item.savedAt)}</small>
           <div class="feature-actions">
             <button type="button" data-open-card="${escapeHtml(item.id)}">Kartı aç</button>
           </div>
@@ -1220,6 +1252,74 @@ function addCourseToDictionary(courseId) {
   lessonStatus.textContent = newItems.length ? `${newItems.length} kart sözlüğe eklendi.` : "Bu dersin kartları zaten sözlükte.";
 }
 
+function openCardDialog() {
+  cardForm.reset();
+  cardFormStatus.textContent = "";
+  cardLanguageInput.value = userSettings.defaultCourse;
+  cardTypeInput.value = "word";
+  if (typeof cardDialog.showModal === "function") {
+    cardDialog.showModal();
+  } else {
+    cardDialog.setAttribute("open", "");
+  }
+  cardTermInput.focus();
+}
+
+function closeCardDialog() {
+  if (typeof cardDialog.close === "function") {
+    cardDialog.close();
+  } else {
+    cardDialog.removeAttribute("open");
+  }
+}
+
+function addManualCard(event) {
+  event.preventDefault();
+  const term = cardTermInput.value.trim();
+  const translation = cardTranslationInput.value.trim();
+  const phrase = cardPhraseInput.value.trim();
+  const phraseTranslation = cardPhraseTranslationInput.value.trim();
+  const language = cardLanguageInput.value;
+  const type = cardTypeInput.value;
+
+  if (!term || !translation || !phrase || !phraseTranslation) {
+    cardFormStatus.textContent = "Zorunlu alanları doldur.";
+    return;
+  }
+
+  const duplicate = [...items, ...resourceDictionary].some((item) => item.language === language && normalize(item.term) === normalize(term));
+  if (duplicate) {
+    cardFormStatus.textContent = "Bu dilde aynı kart zaten var.";
+    return;
+  }
+
+  const newItem = {
+    id: `manual-${Date.now()}`,
+    type,
+    term,
+    translation,
+    phrase,
+    phraseTranslation,
+    language,
+    source: manualSource,
+    title: "Kendi kartlarım",
+    savedAt: "Today",
+    level: "Learning",
+    note: cardNoteInput.value.trim() || "Kullanıcı tarafından eklenen kart.",
+    reviewCount: 0,
+    dueAt: getDateStamp(0),
+  };
+
+  items = [newItem, ...items];
+  selectedId = newItem.id;
+  userSettings.enabledSources = [...new Set([...userSettings.enabledSources, manualSource])];
+  saveItems();
+  saveSettings();
+  renderSourceFilter();
+  clearFilters();
+  closeCardDialog();
+}
+
 function previewCourse(courseId) {
   const course = courseCatalog.find((item) => item.id === courseId);
   if (!course) {
@@ -1342,7 +1442,7 @@ function renderList() {
     statusPill.textContent = statusLabels[item.level] || item.level;
     statusPill.classList.add(item.level.toLowerCase());
     node.querySelector(".language-pill").textContent = languageLabels[item.language] || item.language;
-    node.querySelector(".source-pill").textContent = item.source;
+    node.querySelector(".source-pill").textContent = sourceLabels[item.source] || item.source;
     node.addEventListener("click", () => {
       selectedId = item.id;
       renderList();
@@ -1423,7 +1523,7 @@ function renderDetail(item) {
     <div class="meta-grid">
       <div class="meta-box">
         <span class="detail-label">Sözlük</span>
-        <strong>${escapeHtml(item.source)}</strong>
+        <strong>${escapeHtml(sourceLabels[item.source] || item.source)}</strong>
       </div>
       <div class="meta-box">
         <span class="detail-label">Durum</span>
@@ -1551,6 +1651,7 @@ function deleteItem(id) {
   items = items.filter((item) => item.id !== id);
   selectedId = getFilteredItems()[0]?.id ?? items[0]?.id ?? null;
   saveItems();
+  renderSourceFilter();
   renderList();
 }
 
@@ -1598,6 +1699,9 @@ function clearFilters() {
 }
 
 clearFiltersButton.addEventListener("click", clearFilters);
+newCardButton.addEventListener("click", openCardDialog);
+closeCardDialogButton.addEventListener("click", closeCardDialog);
+cardForm.addEventListener("submit", addManualCard);
 resetButton.addEventListener("click", () => {
   if (!window.confirm("Sözlükteki tüm kartlar temizlensin mi?")) {
     return;
@@ -1605,6 +1709,7 @@ resetButton.addEventListener("click", () => {
   items = [];
   selectedId = null;
   saveItems();
+  renderSourceFilter();
   renderList();
 });
 themeButton.addEventListener("click", () => {

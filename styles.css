@@ -1231,6 +1231,50 @@ button:focus-visible {
   color: var(--accent-2) !important;
 }
 
+.card-dialog {
+  width: min(760px, calc(100vw - 28px));
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 0;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.card-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.46);
+}
+
+.card-dialog form {
+  padding: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.dialog-heading,
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.dialog-heading h2 {
+  margin: 2px 0 0;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.card-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.card-form-wide {
+  grid-column: 1 / -1;
+}
+
 .compact-list .saved-item {
   min-height: 54px;
   padding: 9px 12px;
@@ -1281,8 +1325,13 @@ button:focus-visible {
   .lesson-layout,
   .resource-list,
   .settings-grid,
-  .feature-grid {
+  .feature-grid,
+  .card-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .card-form-wide {
+    grid-column: auto;
   }
 }
 
@@ -1302,6 +1351,8 @@ button:focus-visible {
   }
 
   .topbar-actions,
+  .dialog-heading,
+  .dialog-actions,
   .meta-grid,
   .deck-stats,
   .feature-stats {

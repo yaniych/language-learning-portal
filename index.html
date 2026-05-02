@@ -55,6 +55,7 @@
             <h1>Language Learning Portal</h1>
           </div>
           <div class="topbar-actions">
+            <button class="primary-button" id="newCardButton" type="button">Yeni kart</button>
             <button class="icon-button" id="themeButton" type="button" aria-pressed="false">Koyu</button>
             <button class="icon-button" id="resetButton" type="button" title="Kartları temizle">Temizle</button>
           </div>
@@ -278,6 +279,10 @@
                 <input class="source-toggle" type="checkbox" value="System Catalog" />
                 <span><strong>Sistem kataloğu</strong><small>Kelimeler uygulamanın yerleşik kurs verisinden gelir.</small></span>
               </label>
+              <label class="switch-row">
+                <input class="source-toggle" type="checkbox" value="Manual Entry" />
+                <span><strong>Kendi kartlarım</strong><small>Elle eklediğin kelime ve kalıplar.</small></span>
+              </label>
             </article>
 
             <article class="settings-card danger-zone">
@@ -327,6 +332,63 @@
         </span>
       </button>
     </template>
+
+    <dialog class="card-dialog" id="cardDialog" aria-labelledby="cardDialogTitle">
+      <form id="cardForm" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">Kendi kartın</p>
+            <h2 id="cardDialogTitle">Yeni kart</h2>
+          </div>
+          <button class="icon-button" id="closeCardDialogButton" type="button">Kapat</button>
+        </div>
+
+        <div class="card-form-grid">
+          <label>
+            <span>Dil</span>
+            <select id="cardLanguageInput" required>
+              <option value="Russian">Rusça</option>
+              <option value="English">İngilizce</option>
+              <option value="Spanish">İspanyolca</option>
+              <option value="German">Almanca</option>
+              <option value="French">Fransızca</option>
+            </select>
+          </label>
+          <label>
+            <span>Tip</span>
+            <select id="cardTypeInput" required>
+              <option value="word">Kelime</option>
+              <option value="phrase">Kalıp</option>
+            </select>
+          </label>
+          <label>
+            <span>Kelime veya kalıp</span>
+            <input id="cardTermInput" type="text" required maxlength="80" />
+          </label>
+          <label>
+            <span>Çeviri</span>
+            <input id="cardTranslationInput" type="text" required maxlength="120" />
+          </label>
+          <label>
+            <span>Örnek cümle</span>
+            <input id="cardPhraseInput" type="text" required maxlength="160" />
+          </label>
+          <label>
+            <span>Örnek çevirisi</span>
+            <input id="cardPhraseTranslationInput" type="text" required maxlength="160" />
+          </label>
+          <label class="card-form-wide">
+            <span>Not</span>
+            <input id="cardNoteInput" type="text" maxlength="180" placeholder="Kullanım notu, bağlam veya ipucu" />
+          </label>
+        </div>
+
+        <div class="dialog-actions">
+          <p class="settings-status" id="cardFormStatus" aria-live="polite"></p>
+          <button class="primary-button" type="submit">Kartı ekle</button>
+        </div>
+      </form>
+    </dialog>
 
     <script src="app.js"></script>
   </body>
