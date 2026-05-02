@@ -245,6 +245,7 @@ const legacyStorageKey = "lexideck-saved-items-v3";
 let items = loadItems();
 let selectedId = items[0]?.id ?? null;
 let activeType = "all";
+let currentLessonId = null;
 
 const itemList = document.querySelector("#itemList");
 const detailPanel = document.querySelector("#detailPanel");
@@ -264,12 +265,22 @@ const navItems = document.querySelectorAll(".nav-item");
 const deckViews = document.querySelectorAll(".deck-view");
 const settingsView = document.querySelector("#settingsView");
 const coursesView = document.querySelector("#coursesView");
+const lessonView = document.querySelector("#lessonView");
 const resourcesView = document.querySelector("#resourcesView");
 const courseList = document.querySelector("#courseList");
 const coursesTitle = document.querySelector("#coursesTitle");
 const courseLanguageFlag = document.querySelector("#courseLanguageFlag");
 const courseLanguageName = document.querySelector("#courseLanguageName");
 const openDictionaryButton = document.querySelector("#openDictionaryButton");
+const backToCoursesButton = document.querySelector("#backToCoursesButton");
+const addLessonCardsButton = document.querySelector("#addLessonCardsButton");
+const lessonEyebrow = document.querySelector("#lessonEyebrow");
+const lessonTitle = document.querySelector("#lessonTitle");
+const lessonStepList = document.querySelector("#lessonStepList");
+const lessonCardList = document.querySelector("#lessonCardList");
+const lessonQuizPrompt = document.querySelector("#lessonQuizPrompt");
+const lessonOptions = document.querySelector("#lessonOptions");
+const lessonStatus = document.querySelector("#lessonStatus");
 const saveSettingsButton = document.querySelector("#saveSettingsButton");
 const resetSettingsButton = document.querySelector("#resetSettingsButton");
 const settingsStatus = document.querySelector("#settingsStatus");
@@ -517,13 +528,18 @@ function switchView(view, activeItem) {
   navItems.forEach((item) => item.classList.toggle("active", item === activeItem));
   const showingSettings = view === "settings";
   const showingCourses = view === "courses";
+  const showingLesson = view === "lesson";
   const showingResources = view === "resources";
-  deckViews.forEach((element) => element.classList.toggle("hidden", showingSettings || showingCourses || showingResources));
+  deckViews.forEach((element) => element.classList.toggle("hidden", showingSettings || showingCourses || showingLesson || showingResources));
   settingsView.classList.toggle("hidden", !showingSettings);
   coursesView.classList.toggle("hidden", !showingCourses);
+  lessonView.classList.toggle("hidden", !showingLesson);
   resourcesView.classList.toggle("hidden", !showingResources);
   if (showingCourses) {
     renderCourses();
+  }
+  if (showingLesson) {
+    renderLesson();
   }
 }
 
@@ -563,7 +579,7 @@ function renderCourses() {
         <h2>${escapeHtml(course.title)}</h2>
       </div>
       <p>${escapeHtml(course.description)}</p>
-      ${course.sourceTitle ? `<p class="course-source">Kitap başlığı: ${escapeHtml(course.sourceTitle)}</p>` : ""}
+      ${course.sourceTitle ? `<p class="course-source">Konu başlığı: ${escapeHtml(course.sourceTitle)}</p>` : ""}
       <div class="course-meta">
         <span>${escapeHtml(course.level)}</span>
         <span>${course.minutes} dk</span>
@@ -577,21 +593,83 @@ function renderCourses() {
         <div><span style="width: ${progress}%"></span></div>
       </div>
       <div class="course-actions">
-        <button class="primary-button" type="button" data-course="${course.id}">${isComplete ? "Sözlüğe eklendi" : canAddCards ? "Derse başla" : "Dersi aç"}</button>
+        <button class="primary-button" type="button" data-course="${course.id}">${isComplete ? "Dersi gözden geçir" : "Derse başla"}</button>
         <button class="icon-button" type="button" data-preview="${course.id}">Önizle</button>
       </div>
     `;
-    card.querySelector("[data-course]").disabled = isComplete;
-    card.querySelector("[data-course]").addEventListener("click", () => {
-      if (canAddCards) {
-        addCourseToDictionary(course.id);
-        return;
-      }
-      previewCourse(course.id);
-    });
+    card.querySelector("[data-course]").addEventListener("click", () => startLesson(course.id));
     card.querySelector("[data-preview]").addEventListener("click", () => previewCourse(course.id));
     courseList.appendChild(card);
   });
+}
+
+function startLesson(courseId) {
+  currentLessonId = courseId;
+  lessonStatus.textContent = "";
+  switchView("lesson", document.querySelector('[data-view="courses"]'));
+}
+
+function renderLesson() {
+  const course = courseCatalog.find((item) => item.id === currentLessonId);
+  if (!course) {
+    currentLessonId = courseCatalog.find((item) => item.language === userSettings.defaultCourse)?.id ?? null;
+    return;
+  }
+
+  const courseItems = getCourseItems(course);
+  lessonEyebrow.textContent = `${languageLabels[course.language] || course.language} / ${course.unit || course.level}`;
+  lessonTitle.textContent = course.title;
+  addLessonCardsButton.disabled = !courseItems.length || courseItems.every((item) => items.some((savedItem) => savedItem.id === item.id));
+  addLessonCardsButton.textContent = addLessonCardsButton.disabled ? "Kartlar sözlükte" : "Kartları sözlüğe ekle";
+  lessonStepList.innerHTML = (course.activities || []).map((activity, index) => `
+    <div class="lesson-step">
+      <span>${index + 1}</span>
+      <strong>${escapeHtml(activity)}</strong>
+    </div>
+  `).join("");
+
+  lessonCardList.innerHTML = courseItems.length
+    ? courseItems.map((item) => `
+      <div class="lesson-vocab-card">
+        <strong>${escapeHtml(item.term)}</strong>
+        <span>${escapeHtml(item.translation)}</span>
+        <small>${escapeHtml(item.phrase)}</small>
+      </div>
+    `).join("")
+    : `
+      <div class="empty-list">
+        <strong>Bu dersin kartları hazırlanıyor</strong>
+        <p>Akış sistem kataloğunda duruyor; kelime kartları sonraki içerik güncellemesinde eklenecek.</p>
+      </div>
+    `;
+
+  renderLessonQuiz(courseItems);
+}
+
+function renderLessonQuiz(courseItems) {
+  lessonOptions.innerHTML = "";
+  if (!courseItems.length) {
+    lessonQuizPrompt.textContent = "Bu ders için kontrol sorusu henüz yok.";
+    return;
+  }
+
+  const answer = courseItems[0];
+  const options = [answer, ...resourceDictionary.filter((item) => item.language === answer.language && item.id !== answer.id).slice(0, 2)];
+  lessonQuizPrompt.textContent = `"${answer.term}" ne anlama gelir?`;
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.className = "icon-button";
+    button.type = "button";
+    button.textContent = option.translation;
+    button.addEventListener("click", () => {
+      lessonStatus.textContent = option.id === answer.id ? "Doğru." : `Tekrar bak: ${answer.translation}`;
+    });
+    lessonOptions.appendChild(button);
+  });
+}
+
+function getCourseItems(course) {
+  return course.itemIds.map((id) => resourceDictionary.find((item) => item.id === id)).filter(Boolean);
 }
 
 function addCourseToDictionary(courseId) {
@@ -601,17 +679,17 @@ function addCourseToDictionary(courseId) {
   }
 
   const existingIds = new Set(items.map((item) => item.id));
-  const newItems = course.itemIds
-    .filter((id) => !existingIds.has(id))
-    .map((id) => resourceDictionary.find((item) => item.id === id))
-    .filter(Boolean)
+  const newItems = getCourseItems(course)
+    .filter((item) => !existingIds.has(item.id))
     .map((item) => ({ ...item, savedAt: "Today", level: "Learning" }));
 
   items = [...newItems, ...items];
   selectedId = items[0]?.id ?? null;
   saveItems();
   renderCourses();
+  renderLesson();
   renderList();
+  lessonStatus.textContent = newItems.length ? `${newItems.length} kart sözlüğe eklendi.` : "Bu dersin kartları zaten sözlükte.";
 }
 
 function previewCourse(courseId) {
@@ -943,6 +1021,14 @@ languageMenu.querySelectorAll("[data-language]").forEach((button) => {
 });
 openDictionaryButton.addEventListener("click", () => {
   switchView("deck", document.querySelector('[data-view="deck"]'));
+});
+backToCoursesButton.addEventListener("click", () => {
+  switchView("courses", document.querySelector('[data-view="courses"]'));
+});
+addLessonCardsButton.addEventListener("click", () => {
+  if (currentLessonId) {
+    addCourseToDictionary(currentLessonId);
+  }
 });
 document.addEventListener("click", (event) => {
   if (!event.target.closest("#languageSwitcher")) {

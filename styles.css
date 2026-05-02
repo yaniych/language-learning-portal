@@ -271,6 +271,8 @@ label span,
 .courses-header,
 .course-panel,
 .course-card,
+.lesson-header,
+.lesson-panel,
 .resources-header,
 .resource-card,
 .settings-header,
@@ -282,6 +284,7 @@ label span,
 
 .topbar,
 .courses-header,
+.lesson-header,
 .resources-header,
 .settings-header {
   border-radius: 18px;
@@ -305,6 +308,12 @@ label span,
 }
 
 .courses-header h1 {
+  margin: 2px 0 0;
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.lesson-header h1 {
   margin: 2px 0 0;
   font-size: 34px;
   line-height: 1.05;
@@ -767,6 +776,13 @@ button:focus-visible {
   gap: 16px;
 }
 
+.lesson-view {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+}
+
 .resources-view {
   min-height: 0;
   display: grid;
@@ -891,6 +907,79 @@ button:focus-visible {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.lesson-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(280px, 1.2fr) minmax(260px, 1fr);
+  gap: 16px;
+  align-content: start;
+}
+
+.lesson-panel {
+  border-radius: 18px;
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.lesson-step-list,
+.lesson-card-list,
+.lesson-options {
+  display: grid;
+  gap: 10px;
+}
+
+.lesson-step {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--panel-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lesson-step span {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-2);
+  color: var(--panel);
+  font-weight: 900;
+}
+
+.lesson-vocab-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--panel-2);
+  display: grid;
+  gap: 5px;
+}
+
+.lesson-vocab-card strong {
+  font-size: 22px;
+}
+
+.lesson-vocab-card span {
+  color: var(--accent-2);
+  font-weight: 850;
+}
+
+.lesson-vocab-card small {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.lesson-check h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .resource-list {
@@ -1039,6 +1128,7 @@ button:focus-visible {
   .deck-stats,
   .course-layout,
   .course-list,
+  .lesson-layout,
   .resource-list,
   .settings-grid {
     grid-template-columns: 1fr;

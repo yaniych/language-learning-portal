@@ -161,6 +161,38 @@
           </div>
         </section>
 
+        <section class="lesson-view hidden" id="lessonView" aria-label="Ders">
+          <header class="lesson-header">
+            <div>
+              <p class="eyebrow" id="lessonEyebrow">Ders</p>
+              <h1 id="lessonTitle">Ders</h1>
+            </div>
+            <div class="topbar-actions">
+              <button class="icon-button" id="backToCoursesButton" type="button">Kurslara dön</button>
+              <button class="primary-button" id="addLessonCardsButton" type="button">Kartları sözlüğe ekle</button>
+            </div>
+          </header>
+
+          <div class="lesson-layout">
+            <article class="lesson-panel">
+              <span class="detail-label">Akış</span>
+              <div class="lesson-step-list" id="lessonStepList"></div>
+            </article>
+
+            <article class="lesson-panel">
+              <span class="detail-label">Kartlar</span>
+              <div class="lesson-card-list" id="lessonCardList"></div>
+            </article>
+
+            <article class="lesson-panel lesson-check">
+              <span class="detail-label">Mini kontrol</span>
+              <h2 id="lessonQuizPrompt">Hazır olduğunda kartları sözlüğe ekle.</h2>
+              <div class="lesson-options" id="lessonOptions"></div>
+              <p class="settings-status" id="lessonStatus" aria-live="polite"></p>
+            </article>
+          </div>
+        </section>
+
         <section class="resources-view hidden" id="resourcesView" aria-label="Kaynaklar">
           <header class="resources-header">
             <div>
