@@ -441,6 +441,7 @@ const featureTitle = document.querySelector("#featureTitle");
 const featureSubtitle = document.querySelector("#featureSubtitle");
 const featureDescription = document.querySelector("#featureDescription");
 const featureActionButton = document.querySelector("#featureActionButton");
+const featureContent = document.querySelector("#featureContent");
 const courseList = document.querySelector("#courseList");
 const coursesTitle = document.querySelector("#coursesTitle");
 const courseLanguageFlag = document.querySelector("#courseLanguageFlag");
@@ -610,27 +611,35 @@ const savedAtLabels = {
 const featureMessages = {
   practice: {
     eyebrow: "Pratik",
-    title: "Pratik akışı hazırlanıyor",
-    subtitle: "Kart tekrarlarını yakında ayrı bir oturumda çalışabileceksin.",
-    description: "Şimdilik sözlükte kart seçip Biliyorum, Tekrar veya Öğreniyorum durumlarıyla tekrar planını güncelleyebilirsin.",
+    title: "Pratik",
+    subtitle: "Bugün çalışılacak kartlar",
+    description: "Tekrar zamanı gelen kartları hızlıca işaretleyebilirsin.",
+    action: "Sözlüğe git",
+    actionTarget: "deck",
   },
   phrases: {
     eyebrow: "Günlük kalıplar",
-    title: "Kalıp çalışmaları hazırlanıyor",
-    subtitle: "Günlük konuşma kalıpları için ayrı bir görünüm planlandı.",
-    description: "Kurslardan eklediğin kalıplar şimdilik sözlükte ve ders kartlarında görünür.",
+    title: "Günlük kalıplar",
+    subtitle: "Kaydettiğin kalıplar",
+    description: "Kalıp kartlarını örnek cümleleriyle birlikte tarayabilirsin.",
+    action: "Kurslara git",
+    actionTarget: "courses",
   },
   progress: {
     eyebrow: "İlerleme",
-    title: "İlerleme raporu hazırlanıyor",
-    subtitle: "XP, tekrar geçmişi ve kurs tamamlama verileri ayrı bir raporda toplanacak.",
-    description: "Mevcut günlük hedef ve kart durumları sözlük ekranında takip edilebilir.",
+    title: "İlerleme",
+    subtitle: "Sözlük ve kurs özeti",
+    description: "Kayıtlı kartlar, tekrar durumu ve kurs tamamlama oranını buradan takip edebilirsin.",
+    action: "Kurslara git",
+    actionTarget: "courses",
   },
   saved: {
     eyebrow: "Kaydedilenler",
-    title: "Kaydedilenler görünümü hazırlanıyor",
-    subtitle: "Kaydettiğin kartlar için ayrı bir kütüphane ekranı eklenecek.",
-    description: "Tüm kayıtlı kartlar şu anda ana sözlük ekranındaki filtrelerle yönetiliyor.",
+    title: "Kaydedilenler",
+    subtitle: "Kütüphanendeki kartlar",
+    description: "Kaydettiğin tüm kartları dil ve durum bilgisiyle görebilirsin.",
+    action: "Sözlüğe git",
+    actionTarget: "deck",
   },
 };
 let userSettings = loadSettings();
@@ -800,6 +809,197 @@ function renderFeature(view) {
   featureTitle.textContent = message.title;
   featureSubtitle.textContent = message.subtitle;
   featureDescription.textContent = message.description;
+  featureActionButton.textContent = message.action;
+  featureActionButton.dataset.targetView = message.actionTarget;
+
+  if (view === "practice") {
+    renderPracticeFeature();
+  } else if (view === "phrases") {
+    renderPhraseFeature();
+  } else if (view === "progress") {
+    renderProgressFeature();
+  } else if (view === "saved") {
+    renderSavedFeature();
+  }
+}
+
+function renderPracticeFeature() {
+  const dueItems = items.filter((item) => !item.dueAt || item.dueAt <= getDateStamp(0));
+  if (!dueItems.length) {
+    featureContent.innerHTML = `
+      <div class="feature-empty">
+        <strong>Bugün tekrar yok</strong>
+        <p>Kurslardan yeni kart ekleyebilir veya sözlükte mevcut kartları gözden geçirebilirsin.</p>
+      </div>
+    `;
+    return;
+  }
+
+  featureContent.innerHTML = `
+    <div class="feature-grid">
+      ${dueItems.map((item) => renderPracticeCard(item)).join("")}
+    </div>
+  `;
+}
+
+function renderPracticeCard(item) {
+  return `
+    <article class="feature-card">
+      <div>
+        <span class="detail-label">${escapeHtml(languageLabels[item.language] || item.language)} / ${escapeHtml(statusLabels[item.level] || item.level)}</span>
+        <h3>${escapeHtml(item.term)}</h3>
+        <p>${escapeHtml(item.translation)}</p>
+      </div>
+      <small>${escapeHtml(item.phrase)} · ${escapeHtml(item.phraseTranslation)}</small>
+      <div class="feature-actions">
+        <button type="button" data-practice-level="Known" data-item-id="${escapeHtml(item.id)}">Biliyorum</button>
+        <button type="button" data-practice-level="Review" data-item-id="${escapeHtml(item.id)}">Tekrar</button>
+        <button type="button" data-practice-level="Learning" data-item-id="${escapeHtml(item.id)}">Öğreniyorum</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderPhraseFeature() {
+  const phraseItems = items.filter((item) => item.type === "phrase");
+  if (!phraseItems.length) {
+    featureContent.innerHTML = `
+      <div class="feature-empty">
+        <strong>Kaydedilmiş kalıp yok</strong>
+        <p>Kurslardan kalıp kartları eklediğinde burada görünür.</p>
+      </div>
+    `;
+    return;
+  }
+
+  featureContent.innerHTML = `
+    <div class="feature-grid">
+      ${phraseItems.map((item) => `
+        <article class="feature-card">
+          <div>
+            <span class="detail-label">${escapeHtml(languageLabels[item.language] || item.language)}</span>
+            <h3>${escapeHtml(item.term)}</h3>
+            <p>${escapeHtml(item.translation)}</p>
+          </div>
+          <small>${escapeHtml(item.phrase)} · ${escapeHtml(item.phraseTranslation)}</small>
+          <div class="feature-actions">
+            <button type="button" data-open-card="${escapeHtml(item.id)}">Kartı aç</button>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderProgressFeature() {
+  const knownCount = items.filter((item) => item.level === "Known").length;
+  const reviewCount = items.filter((item) => item.level === "Review").length;
+  const learningCount = items.filter((item) => item.level === "Learning").length;
+  const dueCount = items.filter((item) => !item.dueAt || item.dueAt <= getDateStamp(0)).length;
+  const completedCourses = courseCatalog.filter((course) => {
+    const courseItems = getCourseItems(course);
+    return courseItems.length && courseItems.every((item) => items.some((savedItem) => savedItem.id === item.id));
+  }).length;
+
+  featureContent.innerHTML = `
+    <div class="feature-stats">
+      ${renderProgressStat("Toplam kart", items.length)}
+      ${renderProgressStat("Öğreniliyor", learningCount)}
+      ${renderProgressStat("Tekrar", reviewCount)}
+      ${renderProgressStat("Bilinen", knownCount)}
+      ${renderProgressStat("Bugün tekrar", dueCount)}
+      ${renderProgressStat("Tamamlanan kurs", completedCourses)}
+    </div>
+    <div class="feature-grid">
+      ${Object.keys(languageLabels).map((language) => renderLanguageProgress(language)).join("")}
+    </div>
+  `;
+}
+
+function renderProgressStat(label, value) {
+  return `
+    <div class="feature-stat">
+      <span>${escapeHtml(label)}</span>
+      <strong>${value}</strong>
+    </div>
+  `;
+}
+
+function renderLanguageProgress(language) {
+  const languageCourses = courseCatalog.filter((course) => course.language === language);
+  const languageItems = items.filter((item) => item.language === language);
+  const availableCourseItems = new Set(languageCourses.flatMap((course) => getCourseItems(course).map((item) => item.id)));
+  const addedCourseItems = [...availableCourseItems].filter((id) => items.some((item) => item.id === id));
+  const progress = availableCourseItems.size ? Math.round((addedCourseItems.length / availableCourseItems.size) * 100) : 0;
+
+  return `
+    <article class="feature-card">
+      <div>
+        <span class="detail-label">${escapeHtml(languageLabels[language])}</span>
+        <h3>${languageItems.length} kart</h3>
+        <p>${languageCourses.length} kurs · ${progress}% katalog ilerlemesi</p>
+      </div>
+      <div class="course-progress" aria-label="${escapeHtml(languageLabels[language])} ilerlemesi">
+        <div><span style="width: ${progress}%"></span></div>
+      </div>
+    </article>
+  `;
+}
+
+function renderSavedFeature() {
+  if (!items.length) {
+    featureContent.innerHTML = `
+      <div class="feature-empty">
+        <strong>Henüz kaydedilmiş kart yok</strong>
+        <p>Kurslardan kart ekleyerek kütüphaneni oluşturabilirsin.</p>
+      </div>
+    `;
+    return;
+  }
+
+  featureContent.innerHTML = `
+    <div class="feature-grid">
+      ${sortItems(items).map((item) => `
+        <article class="feature-card">
+          <div>
+            <span class="detail-label">${escapeHtml(languageLabels[item.language] || item.language)} / ${escapeHtml(statusLabels[item.level] || item.level)}</span>
+            <h3>${escapeHtml(item.term)}</h3>
+            <p>${escapeHtml(item.translation)}</p>
+          </div>
+          <small>${escapeHtml(item.source)} · ${escapeHtml(savedAtLabels[item.savedAt] || item.savedAt)}</small>
+          <div class="feature-actions">
+            <button type="button" data-open-card="${escapeHtml(item.id)}">Kartı aç</button>
+          </div>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function handleFeatureAction(event) {
+  const practiceButton = event.target.closest("[data-practice-level]");
+  if (practiceButton) {
+    updateLevel(practiceButton.dataset.itemId, practiceButton.dataset.practiceLevel);
+    renderFeature("practice");
+    return;
+  }
+
+  const openButton = event.target.closest("[data-open-card]");
+  if (openButton) {
+    openSavedCard(openButton.dataset.openCard);
+  }
+}
+
+function openSavedCard(id) {
+  searchInput.value = "";
+  languageFilter.value = "all";
+  sourceFilter.value = "all";
+  sortSelect.value = "newest";
+  segments.forEach((button) => button.classList.toggle("active", button.dataset.type === "all"));
+  activeType = "all";
+  selectedId = id;
+  renderList();
+  switchView("deck", document.querySelector('[data-view="deck"]'));
 }
 
 function renderCourses() {
@@ -1353,8 +1553,10 @@ openDictionaryButton.addEventListener("click", () => {
   switchView("deck", document.querySelector('[data-view="deck"]'));
 });
 featureActionButton.addEventListener("click", () => {
-  switchView("courses", document.querySelector('[data-view="courses"]'));
+  const targetView = featureActionButton.dataset.targetView || "courses";
+  switchView(targetView, document.querySelector(`[data-view="${targetView}"]`));
 });
+featureContent.addEventListener("click", handleFeatureAction);
 backToCoursesButton.addEventListener("click", () => {
   switchView("courses", document.querySelector('[data-view="courses"]'));
 });

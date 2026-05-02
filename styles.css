@@ -1063,6 +1063,107 @@ button:focus-visible {
   align-content: start;
 }
 
+.feature-content {
+  display: grid;
+  gap: 16px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.feature-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--panel-2);
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.feature-card h3 {
+  margin: 4px 0 6px;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.feature-card p,
+.feature-card small {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.feature-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feature-actions button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.feature-actions button:hover {
+  border-color: var(--accent-2);
+}
+
+.feature-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.feature-stat,
+.feature-empty {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--panel-2);
+}
+
+.feature-stat {
+  display: grid;
+  gap: 5px;
+}
+
+.feature-stat span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.feature-stat strong {
+  font-size: 28px;
+}
+
+.feature-empty {
+  color: var(--muted);
+}
+
+.feature-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.feature-empty p {
+  margin: 0;
+  line-height: 1.45;
+}
+
 .feature-panel h2 {
   margin: 0;
   font-size: 24px;
@@ -1167,7 +1268,8 @@ button:focus-visible {
   .course-list,
   .lesson-layout,
   .resource-list,
-  .settings-grid {
+  .settings-grid,
+  .feature-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1189,7 +1291,8 @@ button:focus-visible {
 
   .topbar-actions,
   .meta-grid,
-  .deck-stats {
+  .deck-stats,
+  .feature-stats {
     grid-template-columns: 1fr;
     display: grid;
   }
