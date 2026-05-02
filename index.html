@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Language Learning Portal</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Ana menü">
+        <div class="brand" id="languageSwitcher">
+          <button class="language-flag" id="languageFlagButton" type="button" aria-label="Dil seç">
+            <span class="flag flag-russian" id="currentLanguageFlag"></span>
+          </button>
+          <button class="language-name" id="languageNameButton" type="button">
+            <span id="currentLanguageName">Rusça</span>
+            <span class="language-caret">v</span>
+          </button>
+          <div class="language-menu hidden" id="languageMenu">
+            <button type="button" data-language="Russian"><span class="flag flag-russian"></span><span>Rusça</span></button>
+            <button type="button" data-language="English"><span class="flag flag-english"></span><span>İngilizce</span></button>
+            <button type="button" data-language="Spanish"><span class="flag flag-spanish"></span><span>İspanyolca</span></button>
+            <button type="button" data-language="German"><span class="flag flag-german"></span><span>Almanca</span></button>
+            <button type="button" data-language="French"><span class="flag flag-french"></span><span>Fransızca</span></button>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <span class="nav-label">Öğren</span>
+          <a href="#" class="nav-item active" data-view="deck"><span class="nav-icon">Ev</span><span>Ana sayfa</span></a>
+          <a href="#" class="nav-item" data-view="courses"><span class="nav-icon">Ku</span><span>Kurslar</span></a>
+          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Pr</span><span>Pratik</span></a>
+          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Kp</span><span>Günlük kalıplar</span></a>
+          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">İl</span><span>İlerleme</span></a>
+          <span class="nav-label">Kütüphane</span>
+          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Sö</span><span>Sözlük</span></a>
+          <a href="#" class="nav-item" data-view="resources"><span class="nav-icon">Ka</span><span>Kaynaklar</span></a>
+          <a href="#" class="nav-item" data-view="deck"><span class="nav-icon">Ky</span><span>Kaydedilenler</span></a>
+          <a href="#" class="nav-item" data-view="settings"><span class="nav-icon">Ay</span><span>Ayarlar</span></a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="plan-label">Günlük hedef</span>
+          <strong>12 / 20 XP</strong>
+          <div class="goal-meter" aria-hidden="true"><span></span></div>
+          <small>Rusça temel · kartlar kurslardan gelir</small>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar deck-view">
+          <div>
+            <p class="eyebrow">Senin desten</p>
+            <h1>Language Learning Portal</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-button" id="themeButton" type="button" aria-pressed="false">Koyu</button>
+            <button class="icon-button" id="resetButton" type="button" title="Kartları temizle">Temizle</button>
+            <button class="primary-button" id="exportButton" type="button">CSV aktar</button>
+          </div>
+        </header>
+
+        <section class="toolbar deck-view" aria-label="Filtreler">
+          <label class="search-field">
+            <span>Ara</span>
+            <input id="searchInput" type="search" placeholder="Kelime, kalıp, çeviri..." />
+          </label>
+          <label>
+            <span>Dil</span>
+            <select id="languageFilter">
+              <option value="all">Tüm diller</option>
+              <option value="Russian">Rusça</option>
+              <option value="English">İngilizce</option>
+              <option value="Spanish">İspanyolca</option>
+              <option value="German">Almanca</option>
+              <option value="French">Fransızca</option>
+            </select>
+          </label>
+          <label>
+            <span>Kaynak</span>
+            <select id="sourceFilter">
+              <option value="all">Tüm kaynaklar</option>
+              <option value="Gramota.ru">Gramota.ru</option>
+              <option value="Oxford">Oxford</option>
+              <option value="RAE">RAE</option>
+              <option value="Duden">Duden</option>
+              <option value="Larousse">Larousse</option>
+            </select>
+          </label>
+          <label>
+            <span>Sırala</span>
+            <select id="sortSelect">
+              <option value="newest">En yeni</option>
+              <option value="oldest">En eski</option>
+              <option value="term-az">Kelime A-Z</option>
+              <option value="term-za">Kelime Z-A</option>
+              <option value="language">Dil</option>
+              <option value="status">Durum</option>
+            </select>
+          </label>
+          <div class="segmented" role="tablist" aria-label="Kayıt tipi">
+            <button class="segment active" type="button" data-type="all">Hepsi</button>
+            <button class="segment" type="button" data-type="word">Kelimeler</button>
+            <button class="segment" type="button" data-type="phrase">Kalıplar</button>
+          </div>
+        </section>
+
+        <section class="deck-stats deck-view" aria-label="Sözlük özeti">
+          <article class="stat-card">
+            <span>Öğreniliyor</span>
+            <strong id="learningStat">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Tekrar</span>
+            <strong id="reviewStat">0</strong>
+          </article>
+          <article class="stat-card">
+            <span>Bilinen</span>
+            <strong id="knownStat">0</strong>
+          </article>
+        </section>
+
+        <section class="content-grid deck-view">
+          <div class="list-panel">
+            <div class="list-heading">
+              <div>
+                <strong id="resultCount">0 kart</strong>
+                <span id="sortSummary">En yeni</span>
+              </div>
+              <button class="text-button" id="clearFiltersButton" type="button">Filtreleri temizle</button>
+            </div>
+            <div class="item-list" id="itemList" aria-live="polite"></div>
+          </div>
+
+          <aside class="detail-panel" id="detailPanel" aria-label="Kayıt ayrıntısı">
+            <div class="empty-detail">
+              <h2>Kart seçilmedi</h2>
+              <p>Kursa başladığında kelimeler buraya eklenecek.</p>
+            </div>
+          </aside>
+        </section>
+
+        <section class="courses-view hidden" id="coursesView" aria-label="Kurslar">
+          <header class="courses-header">
+            <div>
+              <p class="eyebrow">Kurslar</p>
+              <h1 id="coursesTitle">Rusça kursları</h1>
+            </div>
+            <button class="icon-button" id="openDictionaryButton" type="button">Sözlüğe git</button>
+          </header>
+
+          <div class="course-layout">
+            <aside class="course-panel">
+              <span class="detail-label">Seçili dil</span>
+              <div class="course-language">
+                <span class="flag flag-russian" id="courseLanguageFlag"></span>
+                <strong id="courseLanguageName">Rusça</strong>
+              </div>
+              <p>Kurslardan eklediğin kelimeler sözlüğünde görünür. Başlangıçta sözlük boş kalır.</p>
+            </aside>
+
+            <div class="course-list" id="courseList" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="resources-view hidden" id="resourcesView" aria-label="Kaynaklar">
+          <header class="resources-header">
+            <div>
+              <p class="eyebrow">Kaynaklar</p>
+              <h1>Çalışma kaynakları</h1>
+            </div>
+          </header>
+
+          <div class="resource-list">
+            <article class="resource-card">
+              <div>
+                <span class="detail-label">PDF</span>
+                <h2>Teach Yourself Russian</h2>
+                <p>Maximilian Fourman kitabı. Rusça kursları bu kaynaktaki alfabe, okuma alıştırmaları ve 1-38 ders akışına göre hazırlanır.</p>
+              </div>
+              <div class="course-meta">
+                <span>Rusça</span>
+                <span>289 sayfa</span>
+                <span>Yerel dosya</span>
+              </div>
+              <a class="primary-button resource-link" href="file:///C:/Users/ASUS/Downloads/Russian,%20Teach%20Yourself%20(Fourman).pdf" target="_blank" rel="noreferrer">PDF aç</a>
+            </article>
+          </div>
+        </section>
+
+        <section class="settings-view hidden" id="settingsView" aria-label="Ayarlar">
+          <header class="settings-header">
+            <div>
+              <p class="eyebrow">Tercihler</p>
+              <h1>Ayarlar</h1>
+            </div>
+            <button class="primary-button" id="saveSettingsButton" type="button">Ayarları kaydet</button>
+          </header>
+
+          <div class="settings-grid">
+            <article class="settings-card">
+              <div>
+                <span class="detail-label">Görünüm</span>
+                <h2>Tema ve düzen</h2>
+              </div>
+              <label>
+                <span>Tema</span>
+                <select id="themeSelect">
+                  <option value="dark">Koyu</option>
+                  <option value="light">Açık</option>
+                </select>
+              </label>
+              <label class="switch-row">
+                <input id="compactListToggle" type="checkbox" />
+                <span>
+                  <strong>Sıkı liste</strong>
+                  <small>Listede daha fazla kart göster.</small>
+                </span>
+              </label>
+            </article>
+
+            <article class="settings-card">
+              <div>
+                <span class="detail-label">Öğrenme</span>
+                <h2>Kurs varsayılanları</h2>
+              </div>
+              <label>
+                <span>Varsayılan kurs</span>
+                <select id="defaultCourseSelect">
+                  <option value="Russian">Rusça</option>
+                  <option value="English">İngilizce</option>
+                  <option value="Spanish">İspanyolca</option>
+                  <option value="German">Almanca</option>
+                  <option value="French">Fransızca</option>
+                </select>
+              </label>
+              <label>
+                <span>Günlük XP hedefi</span>
+                <input id="dailyGoalInput" type="number" min="5" max="100" step="5" />
+              </label>
+            </article>
+
+            <article class="settings-card">
+              <div>
+                <span class="detail-label">Kaynaklar</span>
+                <h2>Sözlük kaynakları</h2>
+              </div>
+              <label class="switch-row">
+                <input class="source-toggle" type="checkbox" value="Gramota.ru" />
+                <span><strong>Gramota.ru</strong><small>Rusça sözlük kaynağı.</small></span>
+              </label>
+              <label class="switch-row">
+                <input class="source-toggle" type="checkbox" value="Oxford" />
+                <span><strong>Oxford</strong><small>İngilizce sözlük kaynağı.</small></span>
+              </label>
+              <label class="switch-row">
+                <input class="source-toggle" type="checkbox" value="RAE" />
+                <span><strong>RAE</strong><small>İspanyolca sözlük kaynağı.</small></span>
+              </label>
+              <label class="switch-row">
+                <input class="source-toggle" type="checkbox" value="Duden" />
+                <span><strong>Duden</strong><small>Almanca sözlük kaynağı.</small></span>
+              </label>
+              <label class="switch-row">
+                <input class="source-toggle" type="checkbox" value="Larousse" />
+                <span><strong>Larousse</strong><small>Fransızca sözlük kaynağı.</small></span>
+              </label>
+            </article>
+
+            <article class="settings-card danger-zone">
+              <div>
+                <span class="detail-label">Veri</span>
+                <h2>Yerel veri</h2>
+                <p>Kartların ve tercihlerin bu tarayıcıda saklanır.</p>
+              </div>
+              <button class="icon-button" id="resetSettingsButton" type="button">Tercihleri sıfırla</button>
+              <p class="settings-status" id="settingsStatus" aria-live="polite"></p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="itemTemplate">
+      <button class="saved-item" type="button">
+        <span class="item-main">
+          <span class="item-topline">
+            <span class="item-title"></span>
+            <span class="status-pill"></span>
+          </span>
+          <span class="item-context"></span>
+          <span class="item-translation"></span>
+        </span>
+        <span class="item-meta">
+          <span class="language-pill"></span>
+          <span class="source-pill"></span>
+        </span>
+      </button>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
