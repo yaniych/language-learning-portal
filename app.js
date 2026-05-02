@@ -505,6 +505,9 @@ const cardPhraseInput = document.querySelector("#cardPhraseInput");
 const cardPhraseTranslationInput = document.querySelector("#cardPhraseTranslationInput");
 const cardNoteInput = document.querySelector("#cardNoteInput");
 const cardFormStatus = document.querySelector("#cardFormStatus");
+const undoToast = document.querySelector("#undoToast");
+const undoToastMessage = document.querySelector("#undoToastMessage");
+const undoToastButton = document.querySelector("#undoToastButton");
 const themeKey = "language-learning-portal-theme";
 const legacyThemeKey = "lexideck-theme";
 const settingsKey = "language-learning-portal-settings";
@@ -1804,6 +1807,28 @@ function showCopyStatus(message) {
   }, 1600);
 }
 
+function showUndoToast(message, restoreItems, restoreSelectedId) {
+  undoToastMessage.textContent = message;
+  undoToast.classList.remove("hidden");
+  undoToastButton.onclick = () => {
+    items = restoreItems;
+    selectedId = restoreSelectedId;
+    saveItems();
+    renderSourceFilter();
+    renderStudyDashboard();
+    renderList();
+    hideUndoToast();
+  };
+  window.clearTimeout(showUndoToast.timeoutId);
+  showUndoToast.timeoutId = window.setTimeout(hideUndoToast, 6000);
+}
+
+function hideUndoToast() {
+  undoToast.classList.add("hidden");
+  undoToastButton.onclick = null;
+  window.clearTimeout(showUndoToast.timeoutId);
+}
+
 function selectNextCard() {
   const filteredItems = getFilteredItems();
   const currentIndex = filteredItems.findIndex((item) => item.id === selectedId);
@@ -1857,12 +1882,15 @@ function deleteItem(id) {
   if (!window.confirm("Bu kart silinsin mi?")) {
     return;
   }
+  const previousItems = [...items];
+  const previousSelectedId = selectedId;
   items = items.filter((item) => item.id !== id);
   selectedId = getFilteredItems()[0]?.id ?? items[0]?.id ?? null;
   saveItems();
   renderSourceFilter();
   renderStudyDashboard();
   renderList();
+  showUndoToast("Kart silindi.", previousItems, previousSelectedId);
 }
 
 function highlightTerm(phrase, term) {
@@ -1917,12 +1945,15 @@ resetButton.addEventListener("click", () => {
   if (!window.confirm("Sözlükteki tüm kartlar temizlensin mi?")) {
     return;
   }
+  const previousItems = [...items];
+  const previousSelectedId = selectedId;
   items = [];
   selectedId = null;
   saveItems();
   renderSourceFilter();
   renderStudyDashboard();
   renderList();
+  showUndoToast("Sözlük temizlendi.", previousItems, previousSelectedId);
 });
 themeButton.addEventListener("click", () => {
   const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
