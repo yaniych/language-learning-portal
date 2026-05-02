@@ -257,7 +257,8 @@ const resourceDictionary = [
 ];
 
 const seedItems = [];
-const storageKey = "lexideck-saved-items-v3";
+const storageKey = "language-learning-portal-saved-items-v1";
+const legacyStorageKey = "lexideck-saved-items-v3";
 let items = loadItems();
 let selectedId = items[0]?.id ?? null;
 let activeType = "all";
@@ -274,7 +275,6 @@ const learningStat = document.querySelector("#learningStat");
 const reviewStat = document.querySelector("#reviewStat");
 const knownStat = document.querySelector("#knownStat");
 const clearFiltersButton = document.querySelector("#clearFiltersButton");
-const exportButton = document.querySelector("#exportButton");
 const resetButton = document.querySelector("#resetButton");
 const themeButton = document.querySelector("#themeButton");
 const navItems = document.querySelectorAll(".nav-item");
@@ -305,8 +305,10 @@ const currentLanguageFlag = document.querySelector("#currentLanguageFlag");
 const currentLanguageName = document.querySelector("#currentLanguageName");
 const itemTemplate = document.querySelector("#itemTemplate");
 const segments = document.querySelectorAll(".segment");
-const themeKey = "lexideck-theme";
-const settingsKey = "lexideck-settings";
+const themeKey = "language-learning-portal-theme";
+const legacyThemeKey = "lexideck-theme";
+const settingsKey = "language-learning-portal-settings";
+const legacySettingsKey = "lexideck-settings";
 const courseCatalog = [
   {
     id: "ru-fourman-alphabet",
@@ -440,7 +442,7 @@ const savedAtLabels = {
 let userSettings = loadSettings();
 
 function loadItems() {
-  const saved = localStorage.getItem(storageKey);
+  const saved = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey);
   return saved ? JSON.parse(saved) : seedItems;
 }
 
@@ -449,7 +451,7 @@ function saveItems() {
 }
 
 function loadSettings() {
-  const saved = localStorage.getItem(settingsKey);
+  const saved = localStorage.getItem(settingsKey) || localStorage.getItem(legacySettingsKey);
   return saved ? { ...defaultSettings, ...JSON.parse(saved) } : { ...defaultSettings };
 }
 
@@ -728,12 +730,7 @@ function renderList() {
   renderStats(filteredItems);
 
   if (!filteredItems.length) {
-    itemList.innerHTML = `
-      <div class="empty-list">
-        <strong>Henüz kart yok</strong>
-        <p>Kursa başladığında kelimeler sözlüğüne eklenecek.</p>
-      </div>
-    `;
+    renderEmptyList();
     renderDetail(null);
     return;
   }
@@ -761,6 +758,39 @@ function renderList() {
   });
 
   renderDetail(items.find((item) => item.id === selectedId));
+}
+
+function renderEmptyList() {
+  const hasCards = items.length > 0;
+  itemList.innerHTML = hasCards
+    ? `
+      <div class="empty-list">
+        <strong>Sonuç bulunamadı</strong>
+        <p>Arama, dil, kaynak veya kart tipi filtrelerini değiştir.</p>
+        <div class="empty-actions">
+          <button class="icon-button" type="button" data-empty-action="clear">Filtreleri temizle</button>
+        </div>
+      </div>
+    `
+    : `
+      <div class="empty-list">
+        <strong>Henüz kart yok</strong>
+        <p>Kurslardan başlangıç kartları ekleyerek kendi sözlüğünü oluştur.</p>
+        <div class="empty-actions">
+          <button class="primary-button" type="button" data-empty-action="courses">Kurslara git</button>
+        </div>
+      </div>
+    `;
+
+  itemList.querySelectorAll("[data-empty-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.emptyAction === "courses") {
+        switchView("courses", document.querySelector('[data-view="courses"]'));
+      } else {
+        clearFilters();
+      }
+    });
+  });
 }
 
 function renderStats(filteredItems) {
@@ -863,35 +893,6 @@ function deleteItem(id) {
   renderList();
 }
 
-function exportCsv() {
-  const rows = getFilteredItems();
-  const header = [
-    "term",
-    "translation",
-    "phrase",
-    "phraseTranslation",
-    "language",
-    "source",
-    "status",
-    "dictionaryUrl",
-  ];
-  const csv = [header, ...rows.map((item) => header.map((key) => item[key === "status" ? "level" : key]))]
-    .map((row) => row.map(csvCell).join(","))
-    .join("\n");
-
-  const blob = new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "language-learning-portal-saved-items.csv";
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
-function csvCell(value) {
-  return `"${String(value ?? "").replaceAll('"', '""')}"`;
-}
-
 function highlightTerm(phrase, term) {
   const safePhrase = escapeHtml(phrase);
   const firstWord = term.split(/\s+/)[0];
@@ -925,7 +926,7 @@ searchInput.addEventListener("input", renderList);
 languageFilter.addEventListener("change", renderList);
 sourceFilter.addEventListener("change", renderList);
 sortSelect.addEventListener("change", renderList);
-clearFiltersButton.addEventListener("click", () => {
+function clearFilters() {
   searchInput.value = "";
   languageFilter.value = "all";
   sourceFilter.value = "all";
@@ -933,8 +934,9 @@ clearFiltersButton.addEventListener("click", () => {
   segments.forEach((button) => button.classList.toggle("active", button.dataset.type === "all"));
   activeType = "all";
   renderList();
-});
-exportButton.addEventListener("click", exportCsv);
+}
+
+clearFiltersButton.addEventListener("click", clearFilters);
 resetButton.addEventListener("click", () => {
   items = [];
   selectedId = null;
@@ -993,6 +995,6 @@ segments.forEach((segment) => {
   });
 });
 
-userSettings.theme = localStorage.getItem(themeKey) || userSettings.theme;
+userSettings.theme = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey) || userSettings.theme;
 applySettings();
 switchView("deck", document.querySelector(".nav-item.active"));

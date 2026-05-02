@@ -478,6 +478,14 @@ button:focus-visible {
   gap: 3px;
 }
 
+.list-tools {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .item-list {
   overflow: auto;
   padding: 8px;
@@ -725,6 +733,27 @@ button:focus-visible {
   color: var(--muted);
   padding: 28px 18px;
   text-align: center;
+}
+
+.empty-list strong {
+  color: var(--ink);
+  display: block;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.empty-list p {
+  margin: 0 auto;
+  max-width: 360px;
+  line-height: 1.45;
+}
+
+.empty-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .hidden {
